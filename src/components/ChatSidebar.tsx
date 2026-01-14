@@ -1,0 +1,104 @@
+import { Plus, MessageSquare, Settings, HelpCircle, ExternalLink } from "lucide-react";
+import { Button } from "./ui/button";
+import { SantraLogo } from "./SantraLogo";
+
+interface Conversation {
+  id: string;
+  title: string;
+  lastMessage: string;
+  timestamp: Date;
+}
+
+interface ChatSidebarProps {
+  conversations: Conversation[];
+  activeId?: string;
+  onNewChat: () => void;
+  onSelectConversation: (id: string) => void;
+  onConsultDoctor: () => void;
+}
+
+export function ChatSidebar({
+  conversations,
+  activeId,
+  onNewChat,
+  onSelectConversation,
+  onConsultDoctor,
+}: ChatSidebarProps) {
+  return (
+    <aside className="w-72 h-full bg-sidebar border-r border-sidebar-border flex flex-col">
+      {/* Header */}
+      <div className="p-4 border-b border-sidebar-border">
+        <SantraLogo size="md" />
+        <p className="text-xs text-muted-foreground mt-1">A Prescribly Product</p>
+      </div>
+
+      {/* New Chat Button */}
+      <div className="p-3">
+        <Button
+          variant="santra-outline"
+          className="w-full justify-start gap-2"
+          onClick={onNewChat}
+        >
+          <Plus size={18} />
+          New Chat
+        </Button>
+      </div>
+
+      {/* Conversations List */}
+      <div className="flex-1 overflow-y-auto scrollbar-thin p-2">
+        <div className="text-xs font-medium text-muted-foreground px-2 py-2">Recent Chats</div>
+        {conversations.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground text-sm">
+            <MessageSquare className="mx-auto mb-2 opacity-50" size={24} />
+            <p>No conversations yet</p>
+            <p className="text-xs mt-1">Start a new chat to begin</p>
+          </div>
+        ) : (
+          <div className="space-y-1">
+            {conversations.map((conv) => (
+              <button
+                key={conv.id}
+                onClick={() => onSelectConversation(conv.id)}
+                className={`w-full text-left p-3 rounded-lg transition-colors group ${
+                  activeId === conv.id
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                    : "hover:bg-sidebar-accent/50 text-sidebar-foreground"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <MessageSquare size={16} className="flex-shrink-0 opacity-60" />
+                  <span className="font-medium text-sm truncate">{conv.title}</span>
+                </div>
+                <p className="text-xs text-muted-foreground truncate mt-1 pl-6">
+                  {conv.lastMessage}
+                </p>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Consult Doctor CTA */}
+      <div className="p-3 border-t border-sidebar-border">
+        <Button
+          variant="secondary"
+          className="w-full justify-start gap-2 text-primary hover:bg-santra-teal-light"
+          onClick={onConsultDoctor}
+        >
+          <ExternalLink size={16} />
+          Consult a Doctor on Prescribly
+        </Button>
+      </div>
+
+      {/* Footer Links */}
+      <div className="p-3 border-t border-sidebar-border flex items-center justify-between">
+        <Button variant="ghost" size="sm" className="text-muted-foreground">
+          <Settings size={16} />
+        </Button>
+        <Button variant="ghost" size="sm" className="text-muted-foreground">
+          <HelpCircle size={16} />
+        </Button>
+      </div>
+    </aside>
+  );
+}

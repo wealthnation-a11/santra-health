@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Plus, MessageSquare, Settings, HelpCircle, ExternalLink, LogOut, User, Trash2 } from "lucide-react";
 import { Button } from "./ui/button";
 import { SantraLogo } from "./SantraLogo";
@@ -48,6 +49,7 @@ export function ChatSidebar({
   onSignOut,
   userName = "User",
 }: ChatSidebarProps) {
+  const navigate = useNavigate();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [conversationToDelete, setConversationToDelete] = useState<Conversation | null>(null);
 
@@ -155,7 +157,7 @@ export function ChatSidebar({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="w-56">
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/settings")}>
                 <Settings size={16} />
                 Settings
               </DropdownMenuItem>

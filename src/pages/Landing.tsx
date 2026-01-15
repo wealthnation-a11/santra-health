@@ -1,4 +1,4 @@
-import { ArrowRight, MessageCircle, Shield, Zap, Heart, Users, Globe } from "lucide-react";
+import { ArrowRight, MessageCircle, Shield, Zap, Heart, Users, Globe, Clock, Brain, Lock, CheckCircle, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SantraLogo } from "@/components/SantraLogo";
 import { useNavigate } from "react-router-dom";
@@ -115,8 +115,32 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Stats Section */}
+      <section className="py-16 px-4 bg-muted/30 border-y border-border">
+        <div className="container mx-auto max-w-6xl">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <div>
+              <p className="text-4xl md:text-5xl font-bold santra-gradient-text mb-2">24/7</p>
+              <p className="text-muted-foreground">Always Available</p>
+            </div>
+            <div>
+              <p className="text-4xl md:text-5xl font-bold santra-gradient-text mb-2">100+</p>
+              <p className="text-muted-foreground">Health Topics</p>
+            </div>
+            <div>
+              <p className="text-4xl md:text-5xl font-bold santra-gradient-text mb-2">50+</p>
+              <p className="text-muted-foreground">Countries Supported</p>
+            </div>
+            <div>
+              <p className="text-4xl md:text-5xl font-bold santra-gradient-text mb-2">Free</p>
+              <p className="text-muted-foreground">To Get Started</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
-      <section id="how-it-works" className="py-20 px-4 bg-muted/30">
+      <section id="how-it-works" className="py-20 px-4">
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
@@ -167,21 +191,136 @@ export default function Landing() {
         </div>
       </section>
 
-      {/* Trust Section */}
+      {/* Use Cases Section */}
+      <section className="py-20 px-4 bg-muted/30">
+        <div className="container mx-auto max-w-6xl">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
+              What Can Santra Help With?
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              From everyday wellness questions to understanding complex health topics
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { icon: Heart, title: "Symptom Checker", desc: "Describe your symptoms and get educational information about possible causes" },
+              { icon: Brain, title: "Mental Health", desc: "Resources and guidance for stress, anxiety, sleep issues, and emotional wellbeing" },
+              { icon: Stethoscope, title: "Medical Conditions", desc: "Learn about conditions, treatments, and what to expect from your healthcare journey" },
+              { icon: Clock, title: "Medication Info", desc: "Understand your medications, side effects, and important interactions to watch for" },
+              { icon: Shield, title: "Preventive Care", desc: "Tips for staying healthy, vaccination schedules, and recommended screenings" },
+              { icon: Globe, title: "Nutrition & Wellness", desc: "Evidence-based advice on diet, exercise, and lifestyle for optimal health" },
+            ].map((item, i) => (
+              <div key={i} className="bg-card border border-border rounded-xl p-6 hover:border-primary/30 transition-colors">
+                <item.icon className="text-primary mb-4" size={24} />
+                <h3 className="font-semibold text-foreground mb-2">{item.title}</h3>
+                <p className="text-sm text-muted-foreground">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Steps */}
       <section className="py-20 px-4">
-        <div className="container mx-auto max-w-4xl text-center">
-          <Globe className="mx-auto text-primary mb-6" size={48} />
-          <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
-            Global Health, Made Accessible
-          </h2>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-10">
-            Santra uses inclusive, neutral language designed for a global audience. 
-            Get health information that's relevant, clear, and trustworthy — no matter where you are.
-          </p>
-          <Button variant="santra" size="lg" onClick={handleStartChat}>
-            Start Your Health Journey
-            <ArrowRight size={18} />
-          </Button>
+        <div className="container mx-auto max-w-4xl">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-4">
+              Get Started in 3 Simple Steps
+            </h2>
+          </div>
+
+          <div className="space-y-8">
+            {[
+              { step: "1", title: "Create Your Account", desc: "Sign up with your email or Google account. We'll ask for basic info to personalize your experience." },
+              { step: "2", title: "Ask Your Question", desc: "Type any health-related question naturally. Santra understands context and provides thoughtful responses." },
+              { step: "3", title: "Get Guidance", desc: "Receive educational information, wellness tips, or get connected to a real doctor when needed." },
+            ].map((item, i) => (
+              <div key={i} className="flex gap-6 items-start">
+                <div className="w-12 h-12 santra-gradient rounded-xl flex items-center justify-center flex-shrink-0 text-primary-foreground font-bold text-lg shadow-santra">
+                  {item.step}
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-foreground mb-2">{item.title}</h3>
+                  <p className="text-muted-foreground">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <Button variant="santra" size="lg" onClick={handleStartChat}>
+              Get Started Now
+              <ArrowRight size={18} />
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Trust & Safety Section */}
+      <section className="py-20 px-4 bg-muted/30">
+        <div className="container mx-auto max-w-6xl">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-display font-bold text-foreground mb-6">
+                Your Privacy & Safety Come First
+              </h2>
+              <div className="space-y-4">
+                {[
+                  { icon: Lock, title: "End-to-End Encryption", desc: "All your conversations are encrypted and stored securely" },
+                  { icon: Shield, title: "Never Shared", desc: "Your health data is never sold or shared with third parties" },
+                  { icon: CheckCircle, title: "Emergency Detection", desc: "Santra recognizes emergencies and provides immediate guidance" },
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-4 items-start">
+                    <div className="w-10 h-10 bg-accent rounded-lg flex items-center justify-center flex-shrink-0">
+                      <item.icon size={20} className="text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-foreground">{item.title}</h4>
+                      <p className="text-sm text-muted-foreground">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="bg-card border border-border rounded-2xl p-8">
+              <Globe className="text-primary mb-6" size={48} />
+              <h3 className="text-2xl font-semibold text-foreground mb-4">
+                Global Health, Made Accessible
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                Santra uses inclusive, neutral language designed for a global audience. 
+                Get health information that's relevant, clear, and trustworthy — no matter where you are.
+              </p>
+              <Button variant="santra-outline" onClick={handleStartChat}>
+                Start Your Health Journey
+                <ArrowRight size={16} />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto max-w-3xl text-center">
+          <div className="santra-gradient rounded-3xl p-12 text-primary-foreground">
+            <h2 className="text-3xl md:text-4xl font-display font-bold mb-4">
+              Ready to Take Control of Your Health?
+            </h2>
+            <p className="text-lg opacity-90 mb-8 max-w-xl mx-auto">
+              Join thousands of users who trust Santra for reliable health information and guidance.
+            </p>
+            <Button 
+              size="xl" 
+              className="bg-white text-primary hover:bg-white/90"
+              onClick={handleStartChat}
+            >
+              Start Chatting with Santra
+              <ArrowRight size={20} />
+            </Button>
+          </div>
         </div>
       </section>
 

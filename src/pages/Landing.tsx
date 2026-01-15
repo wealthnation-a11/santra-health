@@ -2,9 +2,19 @@ import { ArrowRight, MessageCircle, Shield, Zap, Heart, Users, Globe } from "luc
 import { Button } from "@/components/ui/button";
 import { SantraLogo } from "@/components/SantraLogo";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Landing() {
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
+
+  const handleStartChat = () => {
+    if (user) {
+      navigate("/chat");
+    } else {
+      navigate("/auth");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -13,12 +23,22 @@ export default function Landing() {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <SantraLogo size="md" />
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={() => navigate("/chat")}>
-              Sign In
-            </Button>
-            <Button variant="santra" onClick={() => navigate("/chat")}>
-              Start Chat
-            </Button>
+            {!loading && (
+              user ? (
+                <Button variant="santra" onClick={() => navigate("/chat")}>
+                  Open Chat
+                </Button>
+              ) : (
+                <>
+                  <Button variant="ghost" onClick={() => navigate("/auth")}>
+                    Sign In
+                  </Button>
+                  <Button variant="santra" onClick={() => navigate("/auth")}>
+                    Start Chat
+                  </Button>
+                </>
+              )
+            )}
           </div>
         </div>
       </nav>
@@ -47,7 +67,7 @@ export default function Landing() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button variant="santra" size="xl" onClick={() => navigate("/chat")}>
+              <Button variant="santra" size="xl" onClick={handleStartChat}>
                 Start Chat
                 <ArrowRight size={20} />
               </Button>
@@ -158,7 +178,7 @@ export default function Landing() {
             Santra uses inclusive, neutral language designed for a global audience. 
             Get health information that's relevant, clear, and trustworthy — no matter where you are.
           </p>
-          <Button variant="santra" size="lg" onClick={() => navigate("/chat")}>
+          <Button variant="santra" size="lg" onClick={handleStartChat}>
             Start Your Health Journey
             <ArrowRight size={18} />
           </Button>

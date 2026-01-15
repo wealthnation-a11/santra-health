@@ -1,6 +1,13 @@
-import { Plus, MessageSquare, Settings, HelpCircle, ExternalLink } from "lucide-react";
+import { Plus, MessageSquare, Settings, HelpCircle, ExternalLink, LogOut, User } from "lucide-react";
 import { Button } from "./ui/button";
 import { SantraLogo } from "./SantraLogo";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 
 interface Conversation {
   id: string;
@@ -15,6 +22,8 @@ interface ChatSidebarProps {
   onNewChat: () => void;
   onSelectConversation: (id: string) => void;
   onConsultDoctor: () => void;
+  onSignOut?: () => void;
+  userName?: string;
 }
 
 export function ChatSidebar({
@@ -23,6 +32,8 @@ export function ChatSidebar({
   onNewChat,
   onSelectConversation,
   onConsultDoctor,
+  onSignOut,
+  userName = "User",
 }: ChatSidebarProps) {
   return (
     <aside className="w-72 h-full bg-sidebar border-r border-sidebar-border flex flex-col">
@@ -90,14 +101,37 @@ export function ChatSidebar({
         </Button>
       </div>
 
-      {/* Footer Links */}
-      <div className="p-3 border-t border-sidebar-border flex items-center justify-between">
-        <Button variant="ghost" size="sm" className="text-muted-foreground">
-          <Settings size={16} />
-        </Button>
-        <Button variant="ghost" size="sm" className="text-muted-foreground">
-          <HelpCircle size={16} />
-        </Button>
+      {/* User Menu */}
+      <div className="p-3 border-t border-sidebar-border">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="w-full justify-start gap-2 text-muted-foreground">
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <User size={16} className="text-primary" />
+              </div>
+              <span className="truncate flex-1 text-left font-medium text-foreground">
+                {userName}
+              </span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuItem>
+              <Settings size={16} />
+              Settings
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <HelpCircle size={16} />
+              Help & Support
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            {onSignOut && (
+              <DropdownMenuItem onClick={onSignOut} className="text-destructive">
+                <LogOut size={16} />
+                Sign Out
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </aside>
   );

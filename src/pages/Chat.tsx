@@ -2,22 +2,16 @@ import { useState, useRef, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ChatSidebar } from "@/components/ChatSidebar";
-import { ChatMessage, Message } from "@/components/ChatMessage";
+import { ChatMessage } from "@/components/ChatMessage";
 import { ChatInput } from "@/components/ChatInput";
 import { TypingIndicator } from "@/components/TypingIndicator";
 import { EmergencyBanner } from "@/components/EmergencyBanner";
-import { DisclaimerModal } from "@/components/DisclaimerModal";
 import { SantraLogo } from "@/components/SantraLogo";
+import { useConversations } from "@/hooks/useConversations";
+import { useAuth } from "@/hooks/useAuth";
+import { Loader2 } from "lucide-react";
 
-interface Conversation {
-  id: string;
-  title: string;
-  lastMessage: string;
-  timestamp: Date;
-  messages: Message[];
-}
-
-// Mock AI responses for demo
+// Mock AI responses for demo (will be replaced with real AI later)
 const mockResponses = [
   "I understand you're concerned about that. While I can provide general health information, I want to remind you that for specific medical advice, it's always best to consult with a healthcare professional. Here's what I can share...",
   "That's a great question! Based on general health knowledge, I can explain that this is a common concern many people have. Let me break it down for you...",
@@ -29,14 +23,20 @@ const emergencyKeywords = ["chest pain", "can't breathe", "severe bleeding", "un
 
 export default function Chat() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [showDisclaimer, setShowDisclaimer] = useState(true);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [isTyping, setIsTyping] = useState(false);
   const [showEmergency, setShowEmergency] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const activeConversation = conversations.find((c) => c.id === activeConversationId);
+  
+  const { profile, signOut } = useAuth();
+  const {
+    conversations,
+    activeConversation,
+    activeConversationId,
+    setActiveConversationId,
+    createConversation,
+    addMessage,
+    loading,
+  } = useConversations();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -46,54 +46,23 @@ export default function Chat() {
     scrollToBottom();
   }, [activeConversation?.messages, isTyping]);
 
-  const handleNewChat = () => {
-    const newConv: Conversation = {
-      id: Date.now().toString(),
-      title: "New Conversation",
-      lastMessage: "",
-      timestamp: new Date(),
-      messages: [],
-    };
-    setConversations((prev) => [newConv, ...prev]);
-    setActiveConversationId(newConv.id);
+  const handleNewChat = async () => {
+    await createConversation("New Conversation");
     setShowEmergency(false);
     setSidebarOpen(false);
   };
 
   const handleSendMessage = async (content: string) => {
-    if (!activeConversationId) {
-      // Create new conversation if none exists
-      const newConv: Conversation = {
-        id: Date.now().toString(),
-        title: content.slice(0, 30) + (content.length > 30 ? "..." : ""),
-        lastMessage: content,
-        timestamp: new Date(),
-        messages: [],
-      };
-      setConversations([newConv]);
-      setActiveConversationId(newConv.id);
+    let conversationId = activeConversationId;
+
+    // Create new conversation if none exists
+    if (!conversationId) {
+      conversationId = await createConversation(content.slice(0, 30) + (content.length > 30 ? "..." : ""));
+      if (!conversationId) return;
     }
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      content,
-      role: "user",
-      timestamp: new Date(),
-    };
-
-    // Update conversation with user message
-    setConversations((prev) =>
-      prev.map((conv) =>
-        conv.id === (activeConversationId || conversations[0]?.id)
-          ? {
-              ...conv,
-              title: conv.messages.length === 0 ? content.slice(0, 30) + (content.length > 30 ? "..." : "") : conv.title,
-              lastMessage: content,
-              messages: [...conv.messages, userMessage],
-            }
-          : conv
-      )
-    );
+    // Add user message
+    await addMessage(conversationId, content, "user");
 
     // Check for emergency keywords
     const isEmergency = emergencyKeywords.some((keyword) =>
@@ -105,42 +74,38 @@ export default function Chat() {
     // Simulate API call delay
     await new Promise((resolve) => setTimeout(resolve, 1500 + Math.random() * 1000));
 
-    const aiResponse: Message = {
-      id: (Date.now() + 1).toString(),
-      content: isEmergency
-        ? "I'm concerned about what you've shared. This sounds like it could be a serious situation that requires immediate medical attention. Please seek emergency care right away. While I can provide general health information, your safety is the priority here. If you're in immediate danger, please call emergency services (like 911 in the US, 999 in the UK, or your local emergency number)."
-        : mockResponses[Math.floor(Math.random() * mockResponses.length)],
-      role: "assistant",
-      timestamp: new Date(),
-      isEmergency,
-    };
+    const aiContent = isEmergency
+      ? "I'm concerned about what you've shared. This sounds like it could be a serious situation that requires immediate medical attention. Please seek emergency care right away. While I can provide general health information, your safety is the priority here. If you're in immediate danger, please call emergency services (like 911 in the US, 999 in the UK, or your local emergency number)."
+      : mockResponses[Math.floor(Math.random() * mockResponses.length)];
+
+    // Add AI response
+    await addMessage(conversationId, aiContent, "assistant", isEmergency);
 
     setIsTyping(false);
     setShowEmergency(isEmergency);
-
-    // Add AI response
-    setConversations((prev) =>
-      prev.map((conv) =>
-        conv.id === (activeConversationId || conversations[0]?.id)
-          ? {
-              ...conv,
-              lastMessage: aiResponse.content.slice(0, 50) + "...",
-              messages: [...conv.messages, aiResponse],
-            }
-          : conv
-      )
-    );
   };
 
   const handleConsultDoctor = () => {
     window.open("https://prescribly.com", "_blank");
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
+  if (loading) {
+    return (
+      <div className="h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-10 h-10 text-primary animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading your conversations...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen flex bg-background overflow-hidden">
-      {/* Disclaimer Modal */}
-      <DisclaimerModal open={showDisclaimer} onAccept={() => setShowDisclaimer(false)} />
-
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div
@@ -165,6 +130,8 @@ export default function Chat() {
             setSidebarOpen(false);
           }}
           onConsultDoctor={handleConsultDoctor}
+          onSignOut={handleSignOut}
+          userName={profile?.full_name || "User"}
         />
       </div>
 

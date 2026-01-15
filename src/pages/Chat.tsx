@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ChatSidebar } from "@/components/ChatSidebar";
@@ -10,14 +10,9 @@ import { SantraLogo } from "@/components/SantraLogo";
 import { useConversations } from "@/hooks/useConversations";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
-// Mock AI responses for demo (will be replaced with real AI later)
-const mockResponses = [
-  "I understand you're concerned about that. While I can provide general health information, I want to remind you that for specific medical advice, it's always best to consult with a healthcare professional. Here's what I can share...",
-  "That's a great question! Based on general health knowledge, I can explain that this is a common concern many people have. Let me break it down for you...",
-  "Thank you for sharing that with me. From a general wellness perspective, there are several things you should know. However, please remember that I'm here to educate, not diagnose...",
-  "I appreciate you asking about this. It's important to stay informed about health topics. Here's some educational information that might help you understand better...",
-];
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/santra-chat`;
 
 const emergencyKeywords = ["chest pain", "can't breathe", "severe bleeding", "unconscious", "heart attack", "stroke", "suicide", "overdose"];
 
@@ -25,6 +20,7 @@ export default function Chat() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [showEmergency, setShowEmergency] = useState(false);
+  const [streamingContent, setStreamingContent] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const { profile, signOut } = useAuth();
@@ -44,13 +40,98 @@ export default function Chat() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [activeConversation?.messages, isTyping]);
+  }, [activeConversation?.messages, isTyping, streamingContent]);
 
   const handleNewChat = async () => {
     await createConversation("New Conversation");
     setShowEmergency(false);
     setSidebarOpen(false);
   };
+
+  const streamChat = useCallback(async (
+    messages: { role: string; content: string }[],
+    conversationHistory: { role: string; content: string }[],
+    onDelta: (delta: string) => void,
+    onDone: () => void
+  ) => {
+    const resp = await fetch(CHAT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ messages, conversationHistory }),
+    });
+
+    if (!resp.ok) {
+      const errorData = await resp.json().catch(() => ({}));
+      if (resp.status === 429) {
+        toast.error("Rate limit exceeded. Please wait a moment and try again.");
+      } else if (resp.status === 402) {
+        toast.error("Service temporarily unavailable. Please try again later.");
+      } else {
+        toast.error(errorData.error || "Failed to get response. Please try again.");
+      }
+      throw new Error(errorData.error || "Failed to start stream");
+    }
+
+    if (!resp.body) throw new Error("No response body");
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let textBuffer = "";
+    let streamDone = false;
+
+    while (!streamDone) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      textBuffer += decoder.decode(value, { stream: true });
+
+      let newlineIndex: number;
+      while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+        let line = textBuffer.slice(0, newlineIndex);
+        textBuffer = textBuffer.slice(newlineIndex + 1);
+
+        if (line.endsWith("\r")) line = line.slice(0, -1);
+        if (line.startsWith(":") || line.trim() === "") continue;
+        if (!line.startsWith("data: ")) continue;
+
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr === "[DONE]") {
+          streamDone = true;
+          break;
+        }
+
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+          if (content) onDelta(content);
+        } catch {
+          textBuffer = line + "\n" + textBuffer;
+          break;
+        }
+      }
+    }
+
+    // Final flush
+    if (textBuffer.trim()) {
+      for (let raw of textBuffer.split("\n")) {
+        if (!raw) continue;
+        if (raw.endsWith("\r")) raw = raw.slice(0, -1);
+        if (raw.startsWith(":") || raw.trim() === "") continue;
+        if (!raw.startsWith("data: ")) continue;
+        const jsonStr = raw.slice(6).trim();
+        if (jsonStr === "[DONE]") continue;
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+          if (content) onDelta(content);
+        } catch { /* ignore */ }
+      }
+    }
+
+    onDone();
+  }, []);
 
   const handleSendMessage = async (content: string) => {
     let conversationId = activeConversationId;
@@ -70,23 +151,45 @@ export default function Chat() {
     );
 
     setIsTyping(true);
+    setStreamingContent("");
 
-    // Simulate API call delay
-    await new Promise((resolve) => setTimeout(resolve, 1500 + Math.random() * 1000));
+    // Build conversation history for context
+    const conversationHistory = (activeConversation?.messages || []).map((msg) => ({
+      role: msg.role,
+      content: msg.content,
+    }));
 
-    const aiContent = isEmergency
-      ? "I'm concerned about what you've shared. This sounds like it could be a serious situation that requires immediate medical attention. Please seek emergency care right away. While I can provide general health information, your safety is the priority here. If you're in immediate danger, please call emergency services (like 911 in the US, 999 in the UK, or your local emergency number)."
-      : mockResponses[Math.floor(Math.random() * mockResponses.length)];
+    let fullResponse = "";
 
-    // Add AI response
-    await addMessage(conversationId, aiContent, "assistant", isEmergency);
-
-    setIsTyping(false);
-    setShowEmergency(isEmergency);
+    try {
+      await streamChat(
+        [{ role: "user", content }],
+        conversationHistory,
+        (delta) => {
+          fullResponse += delta;
+          setStreamingContent(fullResponse);
+        },
+        async () => {
+          setIsTyping(false);
+          setStreamingContent("");
+          
+          // Check if response indicates emergency
+          const responseIsEmergency = isEmergency || fullResponse.toUpperCase().startsWith("EMERGENCY:");
+          
+          // Save the complete response
+          await addMessage(conversationId!, fullResponse, "assistant", responseIsEmergency);
+          setShowEmergency(responseIsEmergency);
+        }
+      );
+    } catch (error) {
+      console.error("Chat error:", error);
+      setIsTyping(false);
+      setStreamingContent("");
+    }
   };
 
   const handleConsultDoctor = () => {
-    window.open("https://prescribly.com", "_blank");
+    window.open("https://prescribly.app", "_blank");
   };
 
   const handleSignOut = async () => {
@@ -198,7 +301,19 @@ export default function Chat() {
               {activeConversation.messages.map((message) => (
                 <ChatMessage key={message.id} message={message} />
               ))}
-              {isTyping && <TypingIndicator />}
+              {/* Streaming message */}
+              {isTyping && streamingContent && (
+                <ChatMessage
+                  message={{
+                    id: "streaming",
+                    role: "assistant",
+                    content: streamingContent,
+                    isEmergency: false,
+                    timestamp: new Date(),
+                  }}
+                />
+              )}
+              {isTyping && !streamingContent && <TypingIndicator />}
               <div ref={messagesEndRef} />
             </div>
           )}

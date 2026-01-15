@@ -1,5 +1,6 @@
 import { User } from "lucide-react";
 import { SantraLogo } from "./SantraLogo";
+import ReactMarkdown from "react-markdown";
 
 export interface Message {
   id: string;
@@ -32,7 +33,13 @@ export function ChatMessage({ message }: ChatMessageProps) {
               : "bg-santra-chat-ai rounded-2xl rounded-bl-md text-foreground"
           }`}
         >
-          <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{message.content}</p>
+          {isUser ? (
+            <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{message.content}</p>
+          ) : (
+            <div className="text-[15px] leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5 prose-headings:my-3 prose-headings:font-semibold prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none">
+              <ReactMarkdown>{message.content}</ReactMarkdown>
+            </div>
+          )}
         </div>
         <span className={`text-xs text-muted-foreground mt-1 block ${isUser ? "text-right" : "text-left"}`}>
           {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}

@@ -31,6 +31,7 @@ export default function Chat() {
     setActiveConversationId,
     createConversation,
     addMessage,
+    deleteConversation,
     loading,
   } = useConversations();
 
@@ -232,6 +233,7 @@ export default function Chat() {
             setShowEmergency(false);
             setSidebarOpen(false);
           }}
+          onDeleteConversation={deleteConversation}
           onConsultDoctor={handleConsultDoctor}
           onSignOut={handleSignOut}
           userName={profile?.full_name || "User"}

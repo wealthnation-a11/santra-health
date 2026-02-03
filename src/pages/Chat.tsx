@@ -8,9 +8,9 @@ import { TypingIndicator } from "@/components/TypingIndicator";
 import { EmergencyBanner } from "@/components/EmergencyBanner";
 import { SantraLogo } from "@/components/SantraLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LoadingScreen } from "@/components/LoadingScreen";
 import { useConversations } from "@/hooks/useConversations";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/santra-chat`;
@@ -199,14 +199,7 @@ export default function Chat() {
   };
 
   if (loading) {
-    return (
-      <div className="h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-10 h-10 text-primary animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading your conversations...</p>
-        </div>
-      </div>
-    );
+    return <LoadingScreen message="Loading your conversations..." />;
   }
 
   return (

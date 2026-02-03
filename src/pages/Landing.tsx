@@ -1,6 +1,7 @@
 import { ArrowRight, MessageCircle, Shield, Zap, Heart, Users, Globe, Clock, Brain, Lock, CheckCircle, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SantraLogo } from "@/components/SantraLogo";
+import { LoadingScreen } from "@/components/LoadingScreen";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -15,6 +16,10 @@ export default function Landing() {
       navigate("/auth");
     }
   };
+
+  if (loading) {
+    return <LoadingScreen message="Welcome to Santra" />;
+  }
 
   return (
     <div className="min-h-screen bg-background">

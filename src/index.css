@@ -232,6 +232,20 @@
     }
   }
 
+  /* Logo bounce animation for loading */
+  .animate-logo-bounce {
+    animation: logoBounce 1.2s ease-in-out infinite;
+  }
+
+  @keyframes logoBounce {
+    0%, 100% {
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      transform: translateY(-20px) scale(1.05);
+    }
+  }
+
   /* Smooth scrollbar */
   .scrollbar-thin {
     scrollbar-width: thin;

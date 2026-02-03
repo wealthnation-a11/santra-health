@@ -1,4 +1,4 @@
-import { Heart, Sparkles } from "lucide-react";
+import santraLogoImg from "@/assets/santra-logo.png";
 
 interface SantraLogoProps {
   size?: "sm" | "md" | "lg" | "xl";
@@ -20,23 +20,14 @@ const textSizeClasses = {
   xl: "text-4xl",
 };
 
-const iconSizes = {
-  sm: 14,
-  md: 18,
-  lg: 24,
-  xl: 32,
-};
-
 export function SantraLogo({ size = "md", showText = true, className = "" }: SantraLogoProps) {
   return (
     <div className={`flex items-center gap-3 ${className}`}>
-      <div className={`relative ${sizeClasses[size]} santra-gradient rounded-xl flex items-center justify-center shadow-santra`}>
-        <Heart className="text-primary-foreground" size={iconSizes[size]} strokeWidth={2.5} />
-        <Sparkles 
-          className="absolute -top-1 -right-1 text-primary" 
-          size={iconSizes[size] * 0.5} 
-        />
-      </div>
+      <img 
+        src={santraLogoImg} 
+        alt="Santra Logo" 
+        className={`${sizeClasses[size]} rounded-xl object-cover`}
+      />
       {showText && (
         <span className={`font-display font-bold santra-gradient-text ${textSizeClasses[size]}`}>
           Santra

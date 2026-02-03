@@ -7,6 +7,7 @@ import { ChatInput } from "@/components/ChatInput";
 import { TypingIndicator } from "@/components/TypingIndicator";
 import { EmergencyBanner } from "@/components/EmergencyBanner";
 import { SantraLogo } from "@/components/SantraLogo";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { useConversations } from "@/hooks/useConversations";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
@@ -260,12 +261,15 @@ export default function Chat() {
               {activeConversation?.title || "New Chat"}
             </h1>
           </div>
-          <Button variant="santra-ghost" size="sm" onClick={handleConsultDoctor}>
-            Consult a Doctor
-          </Button>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Button variant="santra-ghost" size="sm" onClick={handleConsultDoctor}>
+              Consult a Doctor
+            </Button>
+          </div>
         </header>
 
-        {/* Messages Area */}
+
         <div className="flex-1 overflow-y-auto scrollbar-thin">
           {!activeConversation || activeConversation.messages.length === 0 ? (
             /* Empty State */
@@ -300,8 +304,16 @@ export default function Chat() {
           ) : (
             /* Messages */
             <div className="max-w-3xl mx-auto p-4 space-y-6">
-              {activeConversation.messages.map((message) => (
-                <ChatMessage key={message.id} message={message} />
+              {activeConversation.messages.map((message, index) => (
+                <ChatMessage 
+                  key={message.id} 
+                  message={message} 
+                  showConsultButton={
+                    message.role === "assistant" && 
+                    index === activeConversation.messages.length - 1 &&
+                    !isTyping
+                  }
+                />
               ))}
               {/* Streaming message */}
               {isTyping && streamingContent && (
@@ -313,6 +325,7 @@ export default function Chat() {
                     isEmergency: false,
                     timestamp: new Date(),
                   }}
+                  showConsultButton={false}
                 />
               )}
               {isTyping && !streamingContent && <TypingIndicator />}

@@ -1,5 +1,6 @@
 import { User } from "lucide-react";
 import { SantraLogo } from "./SantraLogo";
+import { ConsultDoctorButton } from "./ConsultDoctorButton";
 import ReactMarkdown from "react-markdown";
 
 export interface Message {
@@ -12,10 +13,12 @@ export interface Message {
 
 interface ChatMessageProps {
   message: Message;
+  showConsultButton?: boolean;
 }
 
-export function ChatMessage({ message }: ChatMessageProps) {
+export function ChatMessage({ message, showConsultButton = false }: ChatMessageProps) {
   const isUser = message.role === "user";
+  const isAI = message.role === "assistant";
 
   return (
     <div className={`flex gap-3 animate-fade-in ${isUser ? "justify-end" : "justify-start"}`}>
@@ -41,9 +44,15 @@ export function ChatMessage({ message }: ChatMessageProps) {
             </div>
           )}
         </div>
-        <span className={`text-xs text-muted-foreground mt-1 block ${isUser ? "text-right" : "text-left"}`}>
-          {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-        </span>
+        
+        <div className={`flex items-center gap-3 mt-2 ${isUser ? "justify-end" : "justify-start"}`}>
+          <span className="text-xs text-muted-foreground">
+            {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          </span>
+          {isAI && showConsultButton && (
+            <ConsultDoctorButton className="text-xs h-7 px-3" />
+          )}
+        </div>
       </div>
 
       {isUser && (

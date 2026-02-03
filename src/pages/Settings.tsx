@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, User, Bell, Shield, Moon, Sun, Loader2, Check } from "lucide-react";
+import { ArrowLeft, User, Bell, Shield, Moon, Sun, Monitor, Loader2, Check, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,7 @@ import { SantraLogo } from "@/components/SantraLogo";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useTheme } from "next-themes";
 
 const countries = [
   "Afghanistan", "Albania", "Algeria", "Argentina", "Australia", "Austria", "Bangladesh",
@@ -24,6 +25,7 @@ const countries = [
 export default function Settings() {
   const navigate = useNavigate();
   const { profile, updateProfile, signOut } = useAuth();
+  const { theme, setTheme } = useTheme();
   
   const [fullName, setFullName] = useState(profile?.full_name || "");
   const [country, setCountry] = useState(profile?.country || "");
@@ -61,6 +63,12 @@ export default function Settings() {
     await signOut();
     navigate("/");
   };
+
+  const themeOptions = [
+    { value: "light", label: "Light", icon: Sun },
+    { value: "dark", label: "Dark", icon: Moon },
+    { value: "system", label: "System", icon: Monitor },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -143,6 +151,49 @@ export default function Settings() {
                 "Save Changes"
               )}
             </Button>
+          </div>
+        </section>
+
+        {/* Appearance Section */}
+        <section className="bg-card border border-border rounded-2xl p-6 mb-6">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-accent rounded-xl flex items-center justify-center">
+              <Palette size={20} className="text-accent-foreground" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-foreground">Appearance</h2>
+              <p className="text-sm text-muted-foreground">Customize how Santra looks</p>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <Label className="mb-3 block">Theme</Label>
+              <div className="grid grid-cols-3 gap-3">
+                {themeOptions.map((option) => {
+                  const Icon = option.icon;
+                  return (
+                    <button
+                      key={option.value}
+                      onClick={() => setTheme(option.value)}
+                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                        theme === option.value
+                          ? "border-primary bg-primary/10"
+                          : "border-border hover:border-primary/50"
+                      }`}
+                    >
+                      <Icon size={24} className={theme === option.value ? "text-primary" : "text-muted-foreground"} />
+                      <span className={`text-sm font-medium ${theme === option.value ? "text-primary" : "text-foreground"}`}>
+                        {option.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                System mode automatically switches between light and dark based on your device settings.
+              </p>
+            </div>
           </div>
         </section>
 

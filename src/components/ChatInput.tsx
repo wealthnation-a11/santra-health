@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { UploadMenu } from "./UploadMenu";
 import { PremiumUploadModal } from "./PremiumUploadModal";
 import { VoiceInputButton } from "./VoiceInputButton";
+import { VoiceLanguageSelector } from "./VoiceLanguageSelector";
 import { useVoiceInput } from "@/hooks/useVoiceInput";
 
 interface ChatInputProps {
@@ -15,6 +16,7 @@ interface ChatInputProps {
 export function ChatInput({ onSend, disabled = false, placeholder = "Ask Santra a health question..." }: ChatInputProps) {
   const [message, setMessage] = useState("");
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [voiceLanguage, setVoiceLanguage] = useState("en-US");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleVoiceTranscript = useCallback((transcript: string) => {
@@ -29,7 +31,7 @@ export function ChatInput({ onSend, disabled = false, placeholder = "Ask Santra 
     remainingUses,
     startListening,
     stopListening,
-  } = useVoiceInput(handleVoiceTranscript);
+  } = useVoiceInput(handleVoiceTranscript, voiceLanguage);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +59,15 @@ export function ChatInput({ onSend, disabled = false, placeholder = "Ask Santra 
   return (
     <>
       <form onSubmit={handleSubmit} className="relative">
+        {/* Language selector row */}
+        <div className="flex items-center justify-end mb-2">
+          <VoiceLanguageSelector
+            value={voiceLanguage}
+            onChange={setVoiceLanguage}
+            disabled={disabled || isListening}
+          />
+        </div>
+        
         <div className="flex items-end gap-2 bg-secondary/50 border border-border rounded-2xl p-2 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/50 transition-all">
           <textarea
             ref={textareaRef}

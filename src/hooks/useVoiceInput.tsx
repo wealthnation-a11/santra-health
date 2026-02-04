@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 const MONTHLY_LIMIT = 10;
 
-export function useVoiceInput(onTranscript: (text: string) => void) {
+export function useVoiceInput(onTranscript: (text: string) => void, language: string = "en-US") {
   const [isListening, setIsListening] = useState(false);
   const [usageCount, setUsageCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -108,7 +108,7 @@ export function useVoiceInput(onTranscript: (text: string) => void) {
       await navigator.mediaDevices.getUserMedia({ audio: true });
 
       const recognition = new SpeechRecognitionAPI();
-      recognition.lang = "en-US";
+      recognition.lang = language;
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
 
@@ -136,6 +136,8 @@ export function useVoiceInput(onTranscript: (text: string) => void) {
           toast.error("Microphone access denied. Please enable it in your browser settings.");
         } else if (event.error === "no-speech") {
           toast.error("No speech detected. Please try again.");
+        } else if (event.error === "language-not-supported") {
+          toast.error("This language is not supported on your device.");
         } else {
           toast.error("Voice input failed. Please try again.");
         }
@@ -152,7 +154,7 @@ export function useVoiceInput(onTranscript: (text: string) => void) {
       console.error("Error starting voice input:", error);
       toast.error("Could not access microphone. Please check your permissions.");
     }
-  }, [canUseVoice, remainingUses, onTranscript]);
+  }, [canUseVoice, remainingUses, onTranscript, language]);
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {

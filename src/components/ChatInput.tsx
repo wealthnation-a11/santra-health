@@ -1,8 +1,10 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Send } from "lucide-react";
 import { Button } from "./ui/button";
 import { UploadMenu } from "./UploadMenu";
 import { PremiumUploadModal } from "./PremiumUploadModal";
+import { VoiceInputButton } from "./VoiceInputButton";
+import { useVoiceInput } from "@/hooks/useVoiceInput";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
@@ -14,6 +16,20 @@ export function ChatInput({ onSend, disabled = false, placeholder = "Ask Santra 
   const [message, setMessage] = useState("");
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleVoiceTranscript = useCallback((transcript: string) => {
+    // Directly send the voice message
+    onSend(transcript);
+  }, [onSend]);
+
+  const {
+    isListening,
+    isLoading: voiceLoading,
+    canUseVoice,
+    remainingUses,
+    startListening,
+    stopListening,
+  } = useVoiceInput(handleVoiceTranscript);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +69,15 @@ export function ChatInput({ onSend, disabled = false, placeholder = "Ask Santra 
             className="flex-1 bg-transparent border-none resize-none focus:outline-none text-foreground placeholder:text-muted-foreground px-3 py-2 min-h-[44px] max-h-[150px] scrollbar-thin"
           />
           <div className="flex items-center gap-1 pb-1">
+            <VoiceInputButton
+              isListening={isListening}
+              isLoading={voiceLoading}
+              canUseVoice={canUseVoice}
+              remainingUses={remainingUses}
+              onStart={startListening}
+              onStop={stopListening}
+              disabled={disabled}
+            />
             <UploadMenu 
               onSelectOption={() => setShowPremiumModal(true)} 
               disabled={disabled} 

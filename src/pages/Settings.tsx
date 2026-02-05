@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, User, Bell, Shield, Moon, Sun, Monitor, Loader2, Check, Palette, HelpCircle } from "lucide-react";
+ import { ArrowLeft, User, Bell, Shield, Moon, Sun, Monitor, Loader2, Check, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -232,26 +232,6 @@ export default function Settings() {
               <Switch checked={emergencyAlerts} onCheckedChange={setEmergencyAlerts} />
             </div>
           </div>
-        </section>
-
-        {/* Help & Support Section */}
-        <section className="bg-card border border-border rounded-2xl p-6 mb-6">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-accent rounded-xl flex items-center justify-center">
-              <HelpCircle size={20} className="text-accent-foreground" />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold text-foreground">Help & Support</h2>
-              <p className="text-sm text-muted-foreground">Get help with using Santra</p>
-            </div>
-          </div>
-          <Button 
-            variant="outline" 
-            className="w-full"
-            onClick={() => navigate("/support")}
-          >
-            Open Support Chat
-          </Button>
         </section>
 
         {/* Privacy Section */}

@@ -1,14 +1,11 @@
-import { Mic, RefreshCw } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
-import { useVoiceInput } from "@/hooks/useVoiceInput";
-import { Skeleton } from "@/components/ui/skeleton";
-
-const MONTHLY_LIMIT = 10;
+ import { Mic, RefreshCw } from "lucide-react";
+ import { Progress } from "@/components/ui/progress";
+ import { useVoiceUsage } from "@/hooks/useVoiceUsage";
 
 export function VoiceUsageCard() {
-  const { usageCount, remainingUses, isLoading } = useVoiceInput(() => {});
-  
-  const usagePercentage = (usageCount / MONTHLY_LIMIT) * 100;
+   const { usageCount, remainingUses, isLoading, monthlyLimit } = useVoiceUsage();
+   
+   const usagePercentage = (usageCount / monthlyLimit) * 100;
   const isNearLimit = remainingUses <= 3;
   const isAtLimit = remainingUses === 0;
 
@@ -23,14 +20,14 @@ export function VoiceUsageCard() {
     return (
       <div className="bg-card border border-border rounded-2xl p-6">
         <div className="flex items-center gap-3 mb-4">
-          <Skeleton className="w-10 h-10 rounded-xl" />
+           <div className="w-10 h-10 rounded-xl bg-muted animate-pulse" />
           <div>
-            <Skeleton className="w-32 h-5 mb-1" />
-            <Skeleton className="w-48 h-4" />
+             <div className="w-32 h-5 mb-1 bg-muted rounded animate-pulse" />
+             <div className="w-48 h-4 bg-muted rounded animate-pulse" />
           </div>
         </div>
-        <Skeleton className="w-full h-2 rounded-full mb-2" />
-        <Skeleton className="w-24 h-4" />
+         <div className="w-full h-2 rounded-full mb-2 bg-muted animate-pulse" />
+         <div className="w-24 h-4 bg-muted rounded animate-pulse" />
       </div>
     );
   }
@@ -52,7 +49,7 @@ export function VoiceUsageCard() {
       <div className="space-y-3">
         <div className="flex justify-between items-center">
           <span className="text-sm text-muted-foreground">
-            {usageCount} of {MONTHLY_LIMIT} uses this month
+             {usageCount} of {monthlyLimit} uses this month
           </span>
           <span className={`text-sm font-medium ${
             isAtLimit ? "text-destructive" : isNearLimit ? "text-warning" : "text-primary"

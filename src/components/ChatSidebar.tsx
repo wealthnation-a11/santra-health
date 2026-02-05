@@ -161,7 +161,7 @@ export function ChatSidebar({
                 <Settings size={16} />
                 Settings
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/support")}>
                 <HelpCircle size={16} />
                 Help & Support
               </DropdownMenuItem>

@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { User } from "lucide-react";
 import { SantraLogo } from "./SantraLogo";
 import { ConsultDoctorButton } from "./ConsultDoctorButton";
+import { MessageActions } from "./MessageActions";
+import { EditMessageInput } from "./EditMessageInput";
 import ReactMarkdown from "react-markdown";
 
 export interface Message {
@@ -14,14 +17,56 @@ export interface Message {
 interface ChatMessageProps {
   message: Message;
   showConsultButton?: boolean;
+  isLastAssistant?: boolean;
+  isLastUser?: boolean;
+  onRegenerate?: () => void;
+  onEdit?: (newContent: string) => void;
+  feedback?: "positive" | "negative" | null;
+  onFeedbackChange?: (feedback: "positive" | "negative" | null) => void;
 }
 
-export function ChatMessage({ message, showConsultButton = false }: ChatMessageProps) {
+export function ChatMessage({
+  message,
+  showConsultButton = false,
+  isLastAssistant = false,
+  isLastUser = false,
+  onRegenerate,
+  onEdit,
+  feedback,
+  onFeedbackChange,
+}: ChatMessageProps) {
+  const [isEditing, setIsEditing] = useState(false);
   const isUser = message.role === "user";
   const isAI = message.role === "assistant";
 
+  const handleSaveEdit = (newContent: string) => {
+    setIsEditing(false);
+    if (newContent !== message.content) {
+      onEdit?.(newContent);
+    }
+  };
+
+  if (isEditing && isUser) {
+    return (
+      <div className="flex gap-3 justify-end">
+        <div className="max-w-[80%] md:max-w-[70%] w-full">
+          <EditMessageInput
+            initialContent={message.content}
+            onSave={handleSaveEdit}
+            onCancel={() => setIsEditing(false)}
+          />
+        </div>
+        <div className="flex-shrink-0 mt-1">
+          <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
+            <User size={16} className="text-muted-foreground" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={`flex gap-3 animate-fade-in ${isUser ? "justify-end" : "justify-start"}`}>
+    <div className={`flex gap-3 animate-fade-in group ${isUser ? "justify-end" : "justify-start"}`}>
       {!isUser && (
         <div className="flex-shrink-0 mt-1">
           <SantraLogo size="sm" showText={false} />
@@ -45,10 +90,26 @@ export function ChatMessage({ message, showConsultButton = false }: ChatMessageP
           )}
         </div>
         
-        <div className={`flex items-center gap-3 mt-2 ${isUser ? "justify-end" : "justify-start"}`}>
+        <div className={`flex items-center gap-2 mt-2 ${isUser ? "justify-end" : "justify-start"}`}>
           <span className="text-xs text-muted-foreground">
             {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
           </span>
+          
+          {/* Message Actions */}
+          {message.id !== "streaming" && (
+            <MessageActions
+              messageId={message.id}
+              content={message.content}
+              role={message.role}
+              isLastAssistant={isLastAssistant}
+              isLastUser={isLastUser}
+              onRegenerate={onRegenerate}
+              onEdit={isUser && isLastUser ? () => setIsEditing(true) : undefined}
+              feedback={feedback}
+              onFeedbackChange={onFeedbackChange}
+            />
+          )}
+          
           {isAI && showConsultButton && (
             <ConsultDoctorButton className="text-xs h-7 px-3" />
           )}

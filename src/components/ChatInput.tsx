@@ -5,15 +5,24 @@ import { UploadMenu } from "./UploadMenu";
 import { PremiumUploadModal } from "./PremiumUploadModal";
 import { VoiceInputButton } from "./VoiceInputButton";
 import { VoiceLanguageSelector } from "./VoiceLanguageSelector";
+import { StopGenerationButton } from "./StopGenerationButton";
 import { useVoiceInput } from "@/hooks/useVoiceInput";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
+  onStop?: () => void;
   disabled?: boolean;
+  isGenerating?: boolean;
   placeholder?: string;
 }
 
-export function ChatInput({ onSend, disabled = false, placeholder = "Ask Santra a health question..." }: ChatInputProps) {
+export function ChatInput({
+  onSend,
+  onStop,
+  disabled = false,
+  isGenerating = false,
+  placeholder = "Ask Santra a health question...",
+}: ChatInputProps) {
   const [message, setMessage] = useState("");
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [voiceLanguage, setVoiceLanguage] = useState("en-US");
@@ -60,7 +69,14 @@ export function ChatInput({ onSend, disabled = false, placeholder = "Ask Santra 
     <>
       <form onSubmit={handleSubmit} className="relative">
         {/* Language selector row */}
-        <div className="flex items-center justify-end mb-2">
+        <div className="flex items-center justify-between mb-2">
+          {/* Stop Generation Button */}
+          <div>
+            {isGenerating && onStop && (
+              <StopGenerationButton onStop={onStop} />
+            )}
+          </div>
+          
           <VoiceLanguageSelector
             value={voiceLanguage}
             onChange={setVoiceLanguage}

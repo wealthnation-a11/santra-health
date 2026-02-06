@@ -211,6 +211,79 @@ export function useConversations() {
     }
   };
 
+  const renameConversation = async (conversationId: string, newTitle: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from("conversations")
+        .update({ title: newTitle })
+        .eq("id", conversationId);
+
+      if (error) throw error;
+
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === conversationId ? { ...c, title: newTitle } : c
+        )
+      );
+    } catch (error) {
+      console.error("Error renaming conversation:", error);
+    }
+  };
+
+  const deleteMessage = async (messageId: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from("messages")
+        .delete()
+        .eq("id", messageId);
+
+      if (error) throw error;
+
+      // Update local state
+      setConversations((prev) =>
+        prev.map((conv) => ({
+          ...conv,
+          messages: conv.messages.filter((m) => m.id !== messageId),
+        }))
+      );
+    } catch (error) {
+      console.error("Error deleting message:", error);
+    }
+  };
+
+  const deleteMessagesAfter = async (conversationId: string, messageId: string) => {
+    if (!user) return;
+
+    const conv = conversations.find((c) => c.id === conversationId);
+    if (!conv) return;
+
+    const messageIndex = conv.messages.findIndex((m) => m.id === messageId);
+    if (messageIndex === -1) return;
+
+    const messagesToDelete = conv.messages.slice(messageIndex);
+    
+    try {
+      for (const msg of messagesToDelete) {
+        await supabase.from("messages").delete().eq("id", msg.id);
+      }
+
+      // Update local state
+      setConversations((prev) =>
+        prev.map((c) =>
+          c.id === conversationId
+            ? { ...c, messages: c.messages.slice(0, messageIndex) }
+            : c
+        )
+      );
+    } catch (error) {
+      console.error("Error deleting messages:", error);
+    }
+  };
+
   const activeConversation = conversations.find((c) => c.id === activeConversationId);
 
   return {
@@ -221,6 +294,9 @@ export function useConversations() {
     createConversation,
     addMessage,
     deleteConversation,
+    renameConversation,
+    deleteMessage,
+    deleteMessagesAfter,
     loading,
     refetch: fetchConversations,
   };

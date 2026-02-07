@@ -1,66 +1,123 @@
 
-# Plan: Make Santra More Like ChatGPT
+# Plan: Add Follow-Up Suggestions (Like ChatGPT)
 
-## ✅ COMPLETED
+This feature adds clickable suggestion chips that appear after AI responses, helping users continue the conversation naturally.
 
-All 8 ChatGPT-like features have been implemented:
+## How It Works
 
-### 1. ✅ Copy Message Button
-- Added to `MessageActions.tsx`
-- Copies message content to clipboard with toast confirmation
+After Santra responds, 2-3 contextual follow-up questions appear as clickable buttons below the message. Clicking a suggestion sends it as the next message automatically.
 
-### 2. ✅ Regenerate Response Button
-- Shows on the last assistant message
-- Deletes the previous response and re-generates from the last user message
-
-### 3. ✅ Edit User Message
-- Click edit icon on last user message to edit inline
-- Saves edit and regenerates the conversation from that point
-
-### 4. ✅ Stop Generation Button
-- Shows "Stop generating" button while streaming
-- Uses `AbortController` to cancel the fetch stream mid-response
-- Saves partial response with "[Response stopped by user]" note
-
-### 5. ✅ Message Feedback (Thumbs Up/Down)
-- Added `message_feedback` table in database
-- Thumbs up/down buttons on all assistant messages
-- Feedback stored in database with user association
-
-### 6. ✅ Conversation Rename
-- Click pencil icon on conversation in sidebar
-- Inline rename with Enter to save, Escape to cancel
-
-### 7. ✅ Search Conversations
-- Search bar in sidebar filters by title or content
-- Shows filtered count when searching
-
-### 8. ✅ Keyboard Shortcuts
-- `Ctrl/Cmd + Shift + O` - New chat
-- `Ctrl/Cmd + Shift + ;` - Toggle sidebar
-- `Escape` - Stop generating
+**Example:**
+- User asks: "What are symptoms of the flu?"
+- Santra responds with flu information
+- Suggestions appear: "How long does flu last?" | "What's the difference between flu and cold?" | "How can I prevent the flu?"
 
 ---
 
-## Files Created
+## Implementation Approach
 
-- `src/components/MessageActions.tsx` - Copy, regenerate, feedback buttons
-- `src/components/StopGenerationButton.tsx` - Stop generation UI
-- `src/components/EditMessageInput.tsx` - Inline edit textarea
-- `src/components/ConversationSearch.tsx` - Sidebar search
-- `src/components/ConversationRenameInput.tsx` - Inline rename input
-- `src/hooks/useKeyboardShortcuts.tsx` - Global keyboard shortcuts
-- `src/lib/arrayUtils.ts` - ES2023 polyfill for findLastIndex
+### Option A: AI-Generated Suggestions (Recommended)
+The AI generates suggestions as part of its response. The edge function instructs the AI to include suggestions in a structured format at the end of each response.
 
-## Files Modified
+**Pros:** Contextually relevant, dynamic, feels natural
+**Cons:** Slightly more tokens per response
 
-- `src/components/ChatMessage.tsx` - Integrated MessageActions, edit mode
-- `src/components/ChatSidebar.tsx` - Added search, rename functionality
-- `src/components/ChatInput.tsx` - Added stop generation button
-- `src/pages/Chat.tsx` - AbortController, regenerate, edit, shortcuts
-- `src/hooks/useConversations.tsx` - Added rename, delete message functions
+### Option B: Static Template Suggestions
+Pre-defined suggestion templates based on health topics.
 
-## Database Changes
+**Pros:** No extra tokens, instant
+**Cons:** Generic, may not fit context
 
-- Created `message_feedback` table with RLS policies
-- Added UPDATE and DELETE policies for messages table
+**I recommend Option A** for the most ChatGPT-like experience.
+
+---
+
+## Technical Implementation
+
+### 1. Update Edge Function
+Modify the system prompt to ask the AI to include suggestions in a specific format:
+
+```
+At the end of your response, on a new line, add 2-3 follow-up questions 
+the user might want to ask, formatted as:
+[SUGGESTIONS]: Question 1? | Question 2? | Question 3?
+```
+
+### 2. Create SuggestionChips Component
+New component to parse and display suggestions as clickable buttons.
+
+```text
+src/components/SuggestionChips.tsx
+- Parse the [SUGGESTIONS] line from AI response
+- Display as horizontal scrollable chips
+- onClick sends the suggestion as next message
+- Styling: pill buttons with hover effects
+```
+
+### 3. Update ChatMessage Component
+- Strip the [SUGGESTIONS] line from displayed message content
+- Pass suggestions to the new component if present
+
+### 4. Update Chat Page
+- Pass `onSendSuggestion` callback to ChatMessage
+- Only show suggestions on the last assistant message
+- Hide suggestions while typing/streaming
+
+---
+
+## Files to Change
+
+```text
+Files to Create:
++-- src/components/SuggestionChips.tsx
+
+Files to Modify:
++-- supabase/functions/santra-chat/index.ts (update system prompt)
++-- src/components/ChatMessage.tsx (parse & display suggestions)
++-- src/pages/Chat.tsx (handle suggestion clicks)
+```
+
+---
+
+## Visual Design
+
+```text
++----------------------------------------------------------+
+|  [Santra AI Response about flu symptoms...]              |
+|                                                          |
+|  Suggested follow-ups:                                   |
+|  +------------------+ +-------------------+ +----------+ |
+|  | How long does    | | Flu vs cold      | | How to   | |
+|  | flu last?        | | differences?      | | prevent? | |
+|  +------------------+ +-------------------+ +----------+ |
++----------------------------------------------------------+
+```
+
+**Styling:**
+- Subtle background (bg-secondary/50)
+- Rounded pill buttons
+- Hover state with primary color
+- Horizontal scroll on mobile
+- 3 suggestions max to avoid clutter
+
+---
+
+## Edge Cases Handled
+
+1. **Streaming:** Don't parse suggestions until response is complete
+2. **Emergency responses:** Still include suggestions but focus on safety follow-ups
+3. **Short responses:** AI may include 1-2 suggestions instead of 3
+4. **Missing suggestions:** If AI doesn't include them, component gracefully hides
+
+---
+
+## Summary
+
+| Component | Change |
+|-----------|--------|
+| Edge function | Add suggestion instruction to system prompt |
+| SuggestionChips | New component for clickable chips |
+| ChatMessage | Parse [SUGGESTIONS] and render chips |
+| Chat page | Handle suggestion click as new message |
+
+This gives users a ChatGPT-like experience with contextual follow-up suggestions after every AI response.

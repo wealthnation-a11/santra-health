@@ -20,7 +20,12 @@ For emergencies (chest pain, difficulty breathing, severe bleeding, stroke sympt
 - Strongly urge calling emergency services (911) or going to the nearest ER
 - Include "EMERGENCY:" at the start of your response
 
-Keep responses concise but thorough. Use simple, accessible language. Show empathy and understanding.`;
+Keep responses concise but thorough. Use simple, accessible language. Show empathy and understanding.
+
+IMPORTANT: At the end of EVERY response, on a new line, add 2-3 helpful follow-up questions the user might want to ask next. Format them exactly like this:
+[SUGGESTIONS]: Question 1? | Question 2? | Question 3?
+
+Make the suggestions contextually relevant to what you just discussed. Keep each suggestion concise (under 8 words).`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {

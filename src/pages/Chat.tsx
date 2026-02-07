@@ -434,6 +434,8 @@ export default function Chat() {
                   isLastUser={message.role === "user" && index === lastUserIdx}
                   onRegenerate={handleRegenerate}
                   onEdit={(newContent) => handleEditMessage(message.id, newContent)}
+                  onSuggestionSelect={handleSendMessage}
+                  showSuggestions={message.role === "assistant" && index === lastAssistantIdx && !isTyping}
                 />
               ))}
               {/* Streaming message */}

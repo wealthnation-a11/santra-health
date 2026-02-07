@@ -4,6 +4,7 @@ import { SantraLogo } from "./SantraLogo";
 import { ConsultDoctorButton } from "./ConsultDoctorButton";
 import { MessageActions } from "./MessageActions";
 import { EditMessageInput } from "./EditMessageInput";
+import { SuggestionChips, parseSuggestions } from "./SuggestionChips";
 import ReactMarkdown from "react-markdown";
 
 export interface Message {
@@ -23,6 +24,8 @@ interface ChatMessageProps {
   onEdit?: (newContent: string) => void;
   feedback?: "positive" | "negative" | null;
   onFeedbackChange?: (feedback: "positive" | "negative" | null) => void;
+  onSuggestionSelect?: (suggestion: string) => void;
+  showSuggestions?: boolean;
 }
 
 export function ChatMessage({
@@ -34,10 +37,17 @@ export function ChatMessage({
   onEdit,
   feedback,
   onFeedbackChange,
+  onSuggestionSelect,
+  showSuggestions = false,
 }: ChatMessageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const isUser = message.role === "user";
   const isAI = message.role === "assistant";
+  
+  // Parse suggestions from AI response
+  const { cleanContent, suggestions } = isAI 
+    ? parseSuggestions(message.content)
+    : { cleanContent: message.content, suggestions: [] };
 
   const handleSaveEdit = (newContent: string) => {
     setIsEditing(false);
@@ -82,10 +92,10 @@ export function ChatMessage({
           }`}
         >
           {isUser ? (
-            <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{message.content}</p>
+            <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{cleanContent}</p>
           ) : (
             <div className="text-[15px] leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5 prose-headings:my-3 prose-headings:font-semibold prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none">
-              <ReactMarkdown>{message.content}</ReactMarkdown>
+              <ReactMarkdown>{cleanContent}</ReactMarkdown>
             </div>
           )}
         </div>
@@ -99,7 +109,7 @@ export function ChatMessage({
           {message.id !== "streaming" && (
             <MessageActions
               messageId={message.id}
-              content={message.content}
+              content={cleanContent}
               role={message.role}
               isLastAssistant={isLastAssistant}
               isLastUser={isLastUser}
@@ -114,6 +124,14 @@ export function ChatMessage({
             <ConsultDoctorButton className="text-xs h-7 px-3" />
           )}
         </div>
+        
+        {/* Suggestion Chips - only show on last assistant message when not streaming */}
+        {isAI && showSuggestions && suggestions.length > 0 && onSuggestionSelect && (
+          <SuggestionChips 
+            suggestions={suggestions} 
+            onSelect={onSuggestionSelect} 
+          />
+        )}
       </div>
 
       {isUser && (

@@ -12,6 +12,7 @@ import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
 import Settings from "./pages/Settings";
 import Support from "./pages/Support";
+import MedicalDictionary from "./pages/MedicalDictionary";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -61,6 +62,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Support />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/dictionary"
+                element={
+                  <ProtectedRoute>
+                    <MedicalDictionary />
                   </ProtectedRoute>
                 }
               />

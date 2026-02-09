@@ -2,3 +2,6 @@ project_id = "pbkjhzfbhtlrjbztwmfg"
 
 [functions.santra-chat]
 verify_jwt = false
+
+[functions.library-chat]
+verify_jwt = false

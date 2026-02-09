@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, User, Globe, Shield, AlertCircle, CheckCircle } from "lucide-react";
+import { ArrowRight, User, Globe, MapPin, Shield, AlertCircle, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,28 +15,12 @@ import {
 import { SantraLogo } from "@/components/SantraLogo";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-
-const countries = [
-  "United States",
-  "United Kingdom",
-  "Canada",
-  "Australia",
-  "Germany",
-  "France",
-  "India",
-  "Brazil",
-  "Japan",
-  "South Africa",
-  "Nigeria",
-  "Kenya",
-  "United Arab Emirates",
-  "Singapore",
-  "Other",
-];
+import { countries, getStatesByCountry } from "@/data/countries";
 
 export default function Onboarding() {
   const [fullName, setFullName] = useState("");
   const [country, setCountry] = useState("");
+  const [state, setState] = useState("");
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [disclaimerAccepted, setDisclaimerAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -45,7 +29,14 @@ export default function Onboarding() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const canSubmit = fullName.trim() && country && termsAccepted && disclaimerAccepted;
+  const availableStates = country ? getStatesByCountry(country) : [];
+
+  const canSubmit = fullName.trim() && country && state && termsAccepted && disclaimerAccepted;
+
+  const handleCountryChange = (value: string) => {
+    setCountry(value);
+    setState(""); // Reset state when country changes
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +48,7 @@ export default function Onboarding() {
       const { error } = await updateProfile({
         full_name: fullName.trim(),
         country,
+        state,
         terms_accepted_at: new Date().toISOString(),
         onboarding_completed: true,
       });
@@ -122,14 +114,38 @@ export default function Onboarding() {
                 <Globe size={16} className="text-primary" />
                 Country
               </Label>
-              <Select value={country} onValueChange={setCountry}>
+              <Select value={country} onValueChange={handleCountryChange}>
                 <SelectTrigger className="h-12">
                   <SelectValue placeholder="Select your country" />
                 </SelectTrigger>
                 <SelectContent>
                   {countries.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
+                    <SelectItem key={c.code} value={c.name}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* State */}
+            <div className="space-y-2">
+              <Label htmlFor="state" className="flex items-center gap-2">
+                <MapPin size={16} className="text-primary" />
+                State / Region
+              </Label>
+              <Select 
+                value={state} 
+                onValueChange={setState}
+                disabled={!country}
+              >
+                <SelectTrigger className="h-12">
+                  <SelectValue placeholder={country ? "Select your state/region" : "Select country first"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableStates.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {s}
                     </SelectItem>
                   ))}
                 </SelectContent>

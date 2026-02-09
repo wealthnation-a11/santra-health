@@ -6,6 +6,7 @@ interface Profile {
   id: string;
   full_name: string | null;
   country: string | null;
+  state: string | null;
   terms_accepted_at: string | null;
   onboarding_completed: boolean;
 }

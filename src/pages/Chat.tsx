@@ -9,6 +9,7 @@ import { EmergencyBanner } from "@/components/EmergencyBanner";
 import { SantraLogo } from "@/components/SantraLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { UpdateLocationPrompt } from "@/components/UpdateLocationPrompt";
 import { useConversations } from "@/hooks/useConversations";
 import { useAuth } from "@/hooks/useAuth";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
@@ -24,6 +25,7 @@ export default function Chat() {
   const [isTyping, setIsTyping] = useState(false);
   const [showEmergency, setShowEmergency] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
+  const [showLocationPrompt, setShowLocationPrompt] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   
@@ -49,6 +51,13 @@ export default function Chat() {
   useEffect(() => {
     scrollToBottom();
   }, [activeConversation?.messages, isTyping, streamingContent]);
+
+  // Check if user needs to update location (has country but no state)
+  useEffect(() => {
+    if (profile && profile.country && !profile.state) {
+      setShowLocationPrompt(true);
+    }
+  }, [profile]);
 
   const handleNewChat = async () => {
     await createConversation("New Conversation");
@@ -472,6 +481,12 @@ export default function Chat() {
           </div>
         </div>
       </main>
+
+      {/* Location Update Prompt for existing users */}
+      <UpdateLocationPrompt
+        open={showLocationPrompt}
+        onOpenChange={setShowLocationPrompt}
+      />
     </div>
   );
 }

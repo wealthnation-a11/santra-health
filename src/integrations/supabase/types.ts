@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          library_id: string | null
           title: string
           updated_at: string
           user_id: string
@@ -25,6 +26,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          library_id?: string | null
           title?: string
           updated_at?: string
           user_id: string
@@ -32,6 +34,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          library_id?: string | null
           title?: string
           updated_at?: string
           user_id?: string
@@ -112,6 +115,7 @@ export type Database = {
           full_name: string | null
           id: string
           onboarding_completed: boolean
+          state: string | null
           terms_accepted_at: string | null
           updated_at: string
         }
@@ -121,6 +125,7 @@ export type Database = {
           full_name?: string | null
           id: string
           onboarding_completed?: boolean
+          state?: string | null
           terms_accepted_at?: string | null
           updated_at?: string
         }
@@ -130,6 +135,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           onboarding_completed?: boolean
+          state?: string | null
           terms_accepted_at?: string | null
           updated_at?: string
         }

@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, MessageSquare, Settings, HelpCircle, ExternalLink, LogOut, User, Trash2, Pencil, BookOpen } from "lucide-react";
+import { Plus, MessageSquare, Settings, HelpCircle, ExternalLink, LogOut, User, Trash2, Pencil, Library } from "lucide-react";
 import { Button } from "./ui/button";
 import { SantraLogo } from "./SantraLogo";
 import { ConversationSearch } from "./ConversationSearch";
@@ -113,14 +113,14 @@ export function ChatSidebar({
             New Chat
           </Button>
           
-          {/* Medical Dictionary */}
+          {/* Libraries */}
           <Button
             variant="ghost"
             className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
-            onClick={() => navigate("/dictionary")}
+            onClick={() => navigate("/libraries")}
           >
-            <BookOpen size={18} />
-            Medical Dictionary
+            <Library size={18} />
+            Libraries
           </Button>
           
           {/* Search */}

@@ -13,6 +13,8 @@ import Onboarding from "./pages/Onboarding";
 import Settings from "./pages/Settings";
 import Support from "./pages/Support";
 import MedicalDictionary from "./pages/MedicalDictionary";
+import Libraries from "./pages/Libraries";
+import LibraryChat from "./pages/LibraryChat";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -70,6 +72,22 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <MedicalDictionary />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/libraries"
+                element={
+                  <ProtectedRoute>
+                    <Libraries />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/library/:libraryId"
+                element={
+                  <ProtectedRoute>
+                    <LibraryChat />
                   </ProtectedRoute>
                 }
               />

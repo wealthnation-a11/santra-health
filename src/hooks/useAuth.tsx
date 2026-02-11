@@ -16,7 +16,7 @@ interface AuthContextType {
   user: User | null;
   profile: Profile | null;
   loading: boolean;
-  signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, options?: { data?: Record<string, unknown> }) => Promise<{ error: Error | null }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signInWithGoogle: () => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
@@ -94,14 +94,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
+  const signUp = async (email: string, password: string, options?: { data?: Record<string, unknown> }) => {
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: window.location.origin,
+        data: options?.data,
       },
     });
+
+    // Save extra profile data if signup succeeded
+    if (!error && signUpData?.user && options?.data) {
+      const { full_name, phone, date_of_birth, gender } = options.data;
+      await supabase
+        .from("profiles")
+        .update({
+          full_name: (full_name as string) || null,
+          phone: (phone as string) || null,
+          date_of_birth: (date_of_birth as string) || null,
+          gender: (gender as string) || null,
+        })
+        .eq("id", signUpData.user.id);
+    }
+
     return { error: error as Error | null };
   };
 

@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, MessageSquare, Settings, HelpCircle, ExternalLink, LogOut, User, Trash2, Pencil, Library } from "lucide-react";
+import { Plus, MessageSquare, Settings, HelpCircle, ExternalLink, LogOut, User, Trash2, Pencil, Library, Heart } from "lucide-react";
 import { Button } from "./ui/button";
 import { SantraLogo } from "./SantraLogo";
 import { ConversationSearch } from "./ConversationSearch";
@@ -121,6 +121,16 @@ export function ChatSidebar({
           >
             <Library size={18} />
             Libraries
+          </Button>
+
+          {/* First Aid */}
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+            onClick={() => navigate("/first-aid")}
+          >
+            <Heart size={18} />
+            First Aid Guide
           </Button>
           
           {/* Search */}

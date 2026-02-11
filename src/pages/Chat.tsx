@@ -29,7 +29,7 @@ export default function Chat() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   
-  const { profile, signOut } = useAuth();
+  const { profile, signOut, user } = useAuth();
   const {
     conversations,
     activeConversation,
@@ -95,7 +95,7 @@ export default function Chat() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       },
-      body: JSON.stringify({ messages, conversationHistory }),
+      body: JSON.stringify({ messages, conversationHistory, userId: user?.id }),
       signal,
     });
 

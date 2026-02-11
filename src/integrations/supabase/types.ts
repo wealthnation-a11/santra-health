@@ -112,9 +112,12 @@ export type Database = {
         Row: {
           country: string | null
           created_at: string
+          date_of_birth: string | null
           full_name: string | null
+          gender: string | null
           id: string
           onboarding_completed: boolean
+          phone: string | null
           state: string | null
           terms_accepted_at: string | null
           updated_at: string
@@ -122,9 +125,12 @@ export type Database = {
         Insert: {
           country?: string | null
           created_at?: string
+          date_of_birth?: string | null
           full_name?: string | null
+          gender?: string | null
           id: string
           onboarding_completed?: boolean
+          phone?: string | null
           state?: string | null
           terms_accepted_at?: string | null
           updated_at?: string
@@ -132,9 +138,12 @@ export type Database = {
         Update: {
           country?: string | null
           created_at?: string
+          date_of_birth?: string | null
           full_name?: string | null
+          gender?: string | null
           id?: string
           onboarding_completed?: boolean
+          phone?: string | null
           state?: string | null
           terms_accepted_at?: string | null
           updated_at?: string

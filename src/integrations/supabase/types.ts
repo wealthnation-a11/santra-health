@@ -41,6 +41,45 @@ export type Database = {
         }
         Relationships: []
       }
+      health_profiles: {
+        Row: {
+          allergies: string[] | null
+          blood_type: string | null
+          conditions: string[] | null
+          created_at: string
+          height_cm: number | null
+          id: string
+          medications: string[] | null
+          updated_at: string
+          user_id: string
+          weight_kg: number | null
+        }
+        Insert: {
+          allergies?: string[] | null
+          blood_type?: string | null
+          conditions?: string[] | null
+          created_at?: string
+          height_cm?: number | null
+          id?: string
+          medications?: string[] | null
+          updated_at?: string
+          user_id: string
+          weight_kg?: number | null
+        }
+        Update: {
+          allergies?: string[] | null
+          blood_type?: string | null
+          conditions?: string[] | null
+          created_at?: string
+          height_cm?: number | null
+          id?: string
+          medications?: string[] | null
+          updated_at?: string
+          user_id?: string
+          weight_kg?: number | null
+        }
+        Relationships: []
+      }
       message_feedback: {
         Row: {
           created_at: string

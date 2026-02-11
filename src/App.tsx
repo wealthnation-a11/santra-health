@@ -15,6 +15,7 @@ import Support from "./pages/Support";
 import MedicalDictionary from "./pages/MedicalDictionary";
 import Libraries from "./pages/Libraries";
 import LibraryChat from "./pages/LibraryChat";
+import FirstAid from "./pages/FirstAid";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -88,6 +89,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <LibraryChat />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/first-aid"
+                element={
+                  <ProtectedRoute>
+                    <FirstAid />
                   </ProtectedRoute>
                 }
               />

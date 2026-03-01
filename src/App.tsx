@@ -16,6 +16,9 @@ import MedicalDictionary from "./pages/MedicalDictionary";
 import Libraries from "./pages/Libraries";
 import LibraryChat from "./pages/LibraryChat";
 import FirstAid from "./pages/FirstAid";
+import SymptomChecker from "./pages/SymptomChecker";
+import Tools from "./pages/Tools";
+import Bookmarks from "./pages/Bookmarks";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -97,6 +100,30 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <FirstAid />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/symptom-checker"
+                element={
+                  <ProtectedRoute>
+                    <SymptomChecker />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/tools"
+                element={
+                  <ProtectedRoute>
+                    <Tools />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/bookmarks"
+                element={
+                  <ProtectedRoute>
+                    <Bookmarks />
                   </ProtectedRoute>
                 }
               />

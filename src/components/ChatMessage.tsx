@@ -26,6 +26,7 @@ interface ChatMessageProps {
   onFeedbackChange?: (feedback: "positive" | "negative" | null) => void;
   onSuggestionSelect?: (suggestion: string) => void;
   showSuggestions?: boolean;
+  conversationId?: string;
 }
 
 export function ChatMessage({
@@ -39,6 +40,7 @@ export function ChatMessage({
   onFeedbackChange,
   onSuggestionSelect,
   showSuggestions = false,
+  conversationId,
 }: ChatMessageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const isUser = message.role === "user";
@@ -117,6 +119,7 @@ export function ChatMessage({
               onEdit={isUser && isLastUser ? () => setIsEditing(true) : undefined}
               feedback={feedback}
               onFeedbackChange={onFeedbackChange}
+              conversationId={conversationId}
             />
           )}
           

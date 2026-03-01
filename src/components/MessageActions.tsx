@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy, Check, RefreshCw, ThumbsUp, ThumbsDown, Pencil, Share2, Download, MessageCircle, Mail, FileText, FileDown } from "lucide-react";
+import { Copy, Check, RefreshCw, ThumbsUp, ThumbsDown, Pencil, Share2, Download, MessageCircle, Mail, FileText, FileDown, Bookmark } from "lucide-react";
 import { Button } from "./ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import {
@@ -25,6 +25,7 @@ interface MessageActionsProps {
   onEdit?: () => void;
   feedback?: "positive" | "negative" | null;
   onFeedbackChange?: (feedback: "positive" | "negative" | null) => void;
+  conversationId?: string;
 }
 
 export function MessageActions({
@@ -37,11 +38,35 @@ export function MessageActions({
   onEdit,
   feedback: initialFeedback,
   onFeedbackChange,
+  conversationId,
 }: MessageActionsProps) {
   const [copied, setCopied] = useState(false);
   const [feedback, setFeedback] = useState<"positive" | "negative" | null>(initialFeedback || null);
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
   const { user } = useAuth();
+
+  // Check bookmark status on mount
+  useState(() => {
+    if (role === "assistant" && user && messageId !== "streaming") {
+      supabase.from("bookmarks").select("id").eq("user_id", user.id).eq("message_id", messageId).maybeSingle().then(({ data }) => {
+        if (data) setIsBookmarked(true);
+      });
+    }
+  });
+
+  const handleBookmark = async () => {
+    if (!user || !conversationId) return;
+    if (isBookmarked) {
+      await supabase.from("bookmarks").delete().eq("user_id", user.id).eq("message_id", messageId);
+      setIsBookmarked(false);
+      toast.success("Bookmark removed");
+    } else {
+      await supabase.from("bookmarks").insert({ user_id: user.id, message_id: messageId, conversation_id: conversationId });
+      setIsBookmarked(true);
+      toast.success("Response saved!");
+    }
+  };
 
   const handleCopy = async () => {
     try {
@@ -271,6 +296,27 @@ export function MessageActions({
               </TooltipTrigger>
               <TooltipContent side="bottom">
                 <p>Bad response</p>
+              </TooltipContent>
+            </Tooltip>
+
+            {/* Bookmark button */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`h-7 w-7 ${
+                    isBookmarked
+                      ? "text-yellow-500 bg-yellow-500/10"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                  onClick={handleBookmark}
+                >
+                  <Bookmark size={14} fill={isBookmarked ? "currentColor" : "none"} />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>{isBookmarked ? "Remove bookmark" : "Save response"}</p>
               </TooltipContent>
             </Tooltip>
           </>

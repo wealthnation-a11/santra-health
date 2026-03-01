@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, MessageSquare, Settings, HelpCircle, ExternalLink, LogOut, User, Trash2, Pencil, Library, Heart } from "lucide-react";
+import { Plus, MessageSquare, Settings, HelpCircle, ExternalLink, LogOut, User, Trash2, Pencil, Library, Heart, Stethoscope, Calculator, Bookmark } from "lucide-react";
 import { Button } from "./ui/button";
 import { SantraLogo } from "./SantraLogo";
 import { ConversationSearch } from "./ConversationSearch";
@@ -123,7 +123,7 @@ export function ChatSidebar({
             Libraries
           </Button>
 
-          {/* First Aid */}
+           {/* First Aid */}
           <Button
             variant="ghost"
             className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
@@ -131,6 +131,36 @@ export function ChatSidebar({
           >
             <Heart size={18} />
             First Aid Guide
+          </Button>
+
+          {/* Symptom Checker */}
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+            onClick={() => navigate("/symptom-checker")}
+          >
+            <Stethoscope size={18} />
+            Symptom Checker
+          </Button>
+
+          {/* Health Tools */}
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+            onClick={() => navigate("/tools")}
+          >
+            <Calculator size={18} />
+            Health Tools
+          </Button>
+
+          {/* Bookmarks */}
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+            onClick={() => navigate("/bookmarks")}
+          >
+            <Bookmark size={18} />
+            Saved Responses
           </Button>
           
           {/* Search */}

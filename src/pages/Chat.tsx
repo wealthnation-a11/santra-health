@@ -445,6 +445,7 @@ export default function Chat() {
                   onEdit={(newContent) => handleEditMessage(message.id, newContent)}
                   onSuggestionSelect={handleSendMessage}
                   showSuggestions={message.role === "assistant" && index === lastAssistantIdx && !isTyping}
+                  conversationId={activeConversationId || undefined}
                 />
               ))}
               {/* Streaming message */}

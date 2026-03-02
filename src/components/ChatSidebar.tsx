@@ -96,180 +96,182 @@ export function ChatSidebar({
   return (
     <>
       <aside className="w-72 h-full bg-sidebar border-r border-sidebar-border flex flex-col">
-        {/* Header */}
-        <div className="p-4 border-b border-sidebar-border">
+        {/* Header - fixed */}
+        <div className="p-4 border-b border-sidebar-border flex-shrink-0">
           <SantraLogo size="md" />
           <p className="text-xs text-muted-foreground mt-1">A Prescribly Product</p>
         </div>
 
-        {/* New Chat Button */}
-        <div className="p-3 space-y-2">
-          <Button
-            variant="santra-outline"
-            className="w-full justify-start gap-2"
-            onClick={onNewChat}
-          >
-            <Plus size={18} />
-            New Chat
-          </Button>
-          
-          {/* Libraries */}
-          <Button
-            variant="ghost"
-            className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
-            onClick={() => navigate("/libraries")}
-          >
-            <Library size={18} />
-            Libraries
-          </Button>
+        {/* Scrollable content area - everything scrolls together */}
+        <div className="flex-1 overflow-y-auto scrollbar-thin">
+          {/* Actions */}
+          <div className="p-3 space-y-1">
+            <Button
+              variant="santra-outline"
+              className="w-full justify-start gap-2"
+              onClick={onNewChat}
+            >
+              <Plus size={18} />
+              New Chat
+            </Button>
+            
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+              onClick={() => navigate("/libraries")}
+            >
+              <Library size={18} />
+              Libraries
+            </Button>
 
-           {/* First Aid */}
-          <Button
-            variant="ghost"
-            className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
-            onClick={() => navigate("/first-aid")}
-          >
-            <Heart size={18} />
-            First Aid Guide
-          </Button>
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+              onClick={() => navigate("/first-aid")}
+            >
+              <Heart size={18} />
+              First Aid Guide
+            </Button>
 
-          {/* Health Tools */}
-          <Button
-            variant="ghost"
-            className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
-            onClick={() => navigate("/tools")}
-          >
-            <Calculator size={18} />
-            Health Tools
-          </Button>
-          
-          {/* Search */}
-          <ConversationSearch
-            value={searchQuery}
-            onChange={setSearchQuery}
-          />
-        </div>
-
-        {/* Conversations List */}
-        <div className="flex-1 overflow-y-auto scrollbar-thin p-2">
-          <div className="text-xs font-medium text-muted-foreground px-2 py-2">
-            Recent Chats {searchQuery && `(${filteredConversations.length})`}
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+              onClick={() => navigate("/tools")}
+            >
+              <Calculator size={18} />
+              Health Tools
+            </Button>
+            
+            <ConversationSearch
+              value={searchQuery}
+              onChange={setSearchQuery}
+            />
           </div>
-          {filteredConversations.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground text-sm">
-              <MessageSquare className="mx-auto mb-2 opacity-50" size={24} />
-              {searchQuery ? (
-                <>
-                  <p>No conversations found</p>
-                  <p className="text-xs mt-1">Try a different search term</p>
-                </>
-              ) : (
-                <>
-                  <p>No conversations yet</p>
-                  <p className="text-xs mt-1">Start a new chat to begin</p>
-                </>
-              )}
+
+          {/* Conversations List - flows naturally in the scroll */}
+          <div className="px-2 pb-2">
+            <div className="text-xs font-medium text-muted-foreground px-2 py-2">
+              Recent Chats {searchQuery && `(${filteredConversations.length})`}
             </div>
-          ) : (
-            <div className="space-y-1">
-              {filteredConversations.map((conv) => (
-                <button
-                  key={conv.id}
-                  onClick={() => onSelectConversation(conv.id)}
-                  className={`w-full text-left p-3 rounded-lg transition-colors group relative ${
-                    activeId === conv.id
-                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                      : "hover:bg-sidebar-accent/50 text-sidebar-foreground"
-                  }`}
-                >
-                  <div className="flex items-center gap-2 pr-16">
-                    <MessageSquare size={16} className="flex-shrink-0 opacity-60" />
-                    {renamingId === conv.id ? (
-                      <ConversationRenameInput
-                        initialTitle={conv.title}
-                        onSave={(title) => handleRename(conv.id, title)}
-                        onCancel={() => setRenamingId(null)}
-                      />
-                    ) : (
-                      <span className="font-medium text-sm truncate">{conv.title}</span>
+            {filteredConversations.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground text-sm">
+                <MessageSquare className="mx-auto mb-2 opacity-50" size={24} />
+                {searchQuery ? (
+                  <>
+                    <p>No conversations found</p>
+                    <p className="text-xs mt-1">Try a different search term</p>
+                  </>
+                ) : (
+                  <>
+                    <p>No conversations yet</p>
+                    <p className="text-xs mt-1">Start a new chat to begin</p>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-1">
+                {filteredConversations.map((conv) => (
+                  <button
+                    key={conv.id}
+                    onClick={() => onSelectConversation(conv.id)}
+                    className={`w-full text-left p-3 rounded-lg transition-colors group relative ${
+                      activeId === conv.id
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                        : "hover:bg-sidebar-accent/50 text-sidebar-foreground"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 pr-16">
+                      <MessageSquare size={16} className="flex-shrink-0 opacity-60" />
+                      {renamingId === conv.id ? (
+                        <ConversationRenameInput
+                          initialTitle={conv.title}
+                          onSave={(title) => handleRename(conv.id, title)}
+                          onCancel={() => setRenamingId(null)}
+                        />
+                      ) : (
+                        <span className="font-medium text-sm truncate">{conv.title}</span>
+                      )}
+                    </div>
+                    {renamingId !== conv.id && (
+                      <p className="text-xs text-muted-foreground truncate mt-1 pl-6 pr-16">
+                        {conv.lastMessage}
+                      </p>
                     )}
-                  </div>
-                  {renamingId !== conv.id && (
-                    <p className="text-xs text-muted-foreground truncate mt-1 pl-6 pr-16">
-                      {conv.lastMessage}
-                    </p>
-                  )}
-                  
-                  {/* Action buttons */}
-                  <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all">
-                    {onRenameConversation && renamingId !== conv.id && (
-                      <button
-                        onClick={(e) => handleRenameClick(e, conv.id)}
-                        className="p-1.5 rounded-md hover:bg-primary/10 hover:text-primary transition-all"
-                        aria-label="Rename conversation"
-                      >
-                        <Pencil size={14} />
-                      </button>
-                    )}
-                    {onDeleteConversation && (
-                      <button
-                        onClick={(e) => handleDeleteClick(e, conv)}
-                        className="p-1.5 rounded-md hover:bg-destructive/10 hover:text-destructive transition-all"
-                        aria-label="Delete conversation"
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    )}
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
+                    
+                    {/* Action buttons */}
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-all">
+                      {onRenameConversation && renamingId !== conv.id && (
+                        <button
+                          onClick={(e) => handleRenameClick(e, conv.id)}
+                          className="p-1.5 rounded-md hover:bg-primary/10 hover:text-primary transition-all"
+                          aria-label="Rename conversation"
+                        >
+                          <Pencil size={14} />
+                        </button>
+                      )}
+                      {onDeleteConversation && (
+                        <button
+                          onClick={(e) => handleDeleteClick(e, conv)}
+                          className="p-1.5 rounded-md hover:bg-destructive/10 hover:text-destructive transition-all"
+                          aria-label="Delete conversation"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Consult Doctor CTA */}
-        <div className="p-3 border-t border-sidebar-border">
-          <Button
-            variant="secondary"
-            className="w-full justify-start gap-2 text-primary hover:bg-santra-teal-light"
-            onClick={onConsultDoctor}
-          >
-            <ExternalLink size={16} />
-            Consult a Doctor on Prescribly
-          </Button>
-        </div>
+        {/* Footer - fixed at bottom */}
+        <div className="flex-shrink-0 border-t border-sidebar-border">
+          {/* Consult Doctor CTA */}
+          <div className="p-3">
+            <Button
+              variant="secondary"
+              className="w-full justify-start gap-2 text-primary hover:bg-santra-teal-light"
+              onClick={onConsultDoctor}
+            >
+              <ExternalLink size={16} />
+              Consult a Doctor on Prescribly
+            </Button>
+          </div>
 
-        {/* User Menu */}
-        <div className="p-3 border-t border-sidebar-border">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="w-full justify-start gap-2 text-muted-foreground">
-                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                  <User size={16} className="text-primary" />
-                </div>
-                <span className="truncate flex-1 text-left font-medium text-foreground">
-                  {userName}
-                </span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56">
-              <DropdownMenuItem onClick={() => navigate("/settings")}>
-                <Settings size={16} />
-                Settings
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/support")}>
-                <HelpCircle size={16} />
-                Help & Support
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              {onSignOut && (
-                <DropdownMenuItem onClick={onSignOut} className="text-destructive">
-                  <LogOut size={16} />
-                  Sign Out
+          {/* User Menu */}
+          <div className="px-3 pb-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="w-full justify-start gap-2 text-muted-foreground">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    <User size={16} className="text-primary" />
+                  </div>
+                  <span className="truncate flex-1 text-left font-medium text-foreground">
+                    {userName}
+                  </span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                <DropdownMenuItem onClick={() => navigate("/settings")}>
+                  <Settings size={16} />
+                  Settings
                 </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <DropdownMenuItem onClick={() => navigate("/support")}>
+                  <HelpCircle size={16} />
+                  Help & Support
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                {onSignOut && (
+                  <DropdownMenuItem onClick={onSignOut} className="text-destructive">
+                    <LogOut size={16} />
+                    Sign Out
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </aside>
 

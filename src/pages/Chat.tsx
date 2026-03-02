@@ -346,7 +346,7 @@ export default function Chat() {
 
       {/* Sidebar */}
       <div
-        className={`fixed md:relative z-50 h-full transition-transform duration-300 ${
+        className={`fixed md:relative z-50 h-full transition-transform duration-300 will-change-transform ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >

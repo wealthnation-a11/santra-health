@@ -196,6 +196,7 @@ export type Database = {
           id: string
           onboarding_completed: boolean
           phone: string | null
+          preferred_language: string | null
           state: string | null
           terms_accepted_at: string | null
           updated_at: string
@@ -209,6 +210,7 @@ export type Database = {
           id: string
           onboarding_completed?: boolean
           phone?: string | null
+          preferred_language?: string | null
           state?: string | null
           terms_accepted_at?: string | null
           updated_at?: string
@@ -222,6 +224,7 @@ export type Database = {
           id?: string
           onboarding_completed?: boolean
           phone?: string | null
+          preferred_language?: string | null
           state?: string | null
           terms_accepted_at?: string | null
           updated_at?: string

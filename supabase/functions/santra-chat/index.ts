@@ -34,7 +34,7 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, conversationHistory, userId } = await req.json();
+    const { messages, conversationHistory, userId, preferredLanguage } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
@@ -73,6 +73,19 @@ serve(async (req) => {
         console.error("Error fetching health profile:", e);
         // Continue without health profile context
       }
+    }
+
+    // Add language instruction if not English
+    if (preferredLanguage && preferredLanguage !== "en") {
+      const langMap: Record<string, string> = {
+        es: "Spanish", fr: "French", de: "German", it: "Italian", pt: "Portuguese",
+        zh: "Chinese (Simplified)", ja: "Japanese", ko: "Korean", ar: "Arabic",
+        hi: "Hindi", ru: "Russian", nl: "Dutch", pl: "Polish", tr: "Turkish",
+        vi: "Vietnamese", th: "Thai", id: "Indonesian", ms: "Malay", sw: "Swahili",
+        yo: "Yoruba", ha: "Hausa", ig: "Igbo", am: "Amharic", zu: "Zulu",
+      };
+      const langName = langMap[preferredLanguage] || preferredLanguage;
+      systemPrompt += `\n\nIMPORTANT: Always respond in ${langName}. The user prefers ${langName} as their language.`;
     }
 
     // Build conversation context

@@ -9,6 +9,7 @@ interface Profile {
   state: string | null;
   terms_accepted_at: string | null;
   onboarding_completed: boolean;
+  preferred_language: string | null;
 }
 
 interface AuthContextType {

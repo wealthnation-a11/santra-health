@@ -31,6 +31,7 @@ export default function Settings() {
   
   const [fullName, setFullName] = useState(profile?.full_name || "");
   const [country, setCountry] = useState(profile?.country || "");
+  const [preferredLanguage, setPreferredLanguage] = useState(profile?.preferred_language || "en");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -50,7 +51,7 @@ export default function Settings() {
 
     setSaving(true);
     try {
-      await updateProfile({ full_name: fullName.trim(), country });
+      await updateProfile({ full_name: fullName.trim(), country, preferred_language: preferredLanguage });
       setSaved(true);
       toast.success("Profile updated successfully");
       setTimeout(() => setSaved(false), 2000);
@@ -131,6 +132,45 @@ export default function Settings() {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+
+            <div>
+              <Label htmlFor="language">AI Response Language</Label>
+              <Select value={preferredLanguage} onValueChange={setPreferredLanguage}>
+                <SelectTrigger className="mt-1.5">
+                  <SelectValue placeholder="Select language" />
+                </SelectTrigger>
+                <SelectContent className="max-h-60">
+                  {[
+                    { code: "en", name: "English" },
+                    { code: "es", name: "Spanish" },
+                    { code: "fr", name: "French" },
+                    { code: "de", name: "German" },
+                    { code: "it", name: "Italian" },
+                    { code: "pt", name: "Portuguese" },
+                    { code: "zh", name: "Chinese (Simplified)" },
+                    { code: "ja", name: "Japanese" },
+                    { code: "ko", name: "Korean" },
+                    { code: "ar", name: "Arabic" },
+                    { code: "hi", name: "Hindi" },
+                    { code: "ru", name: "Russian" },
+                    { code: "nl", name: "Dutch" },
+                    { code: "pl", name: "Polish" },
+                    { code: "tr", name: "Turkish" },
+                    { code: "yo", name: "Yoruba" },
+                    { code: "ha", name: "Hausa" },
+                    { code: "ig", name: "Igbo" },
+                    { code: "sw", name: "Swahili" },
+                    { code: "am", name: "Amharic" },
+                    { code: "zu", name: "Zulu" },
+                  ].map((lang) => (
+                    <SelectItem key={lang.code} value={lang.code}>
+                      {lang.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground mt-1">Santra will respond in your preferred language</p>
             </div>
 
             <Button 

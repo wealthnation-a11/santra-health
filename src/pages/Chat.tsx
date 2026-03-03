@@ -5,6 +5,7 @@ import { ChatSidebar } from "@/components/ChatSidebar";
 import { ChatMessage } from "@/components/ChatMessage";
 import { ChatInput } from "@/components/ChatInput";
 import { TypingIndicator } from "@/components/TypingIndicator";
+import { DailyLimitModal } from "@/components/DailyLimitModal";
 import { EmergencyBanner } from "@/components/EmergencyBanner";
 import { SantraLogo } from "@/components/SantraLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -12,6 +13,7 @@ import { LoadingScreen } from "@/components/LoadingScreen";
 import { UpdateLocationPrompt } from "@/components/UpdateLocationPrompt";
 import { useConversations } from "@/hooks/useConversations";
 import { useAuth } from "@/hooks/useAuth";
+import { useMessageUsage } from "@/hooks/useMessageUsage";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { findLastIndex } from "@/lib/arrayUtils";
 import { toast } from "sonner";
@@ -26,10 +28,12 @@ export default function Chat() {
   const [showEmergency, setShowEmergency] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
   const [showLocationPrompt, setShowLocationPrompt] = useState(false);
+  const [showLimitModal, setShowLimitModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   
   const { profile, signOut, user } = useAuth();
+  const { remainingMessages, canSendMessage, dailyLimit, incrementUsage } = useMessageUsage();
   const {
     conversations,
     activeConversation,
@@ -174,6 +178,12 @@ export default function Chat() {
   }, []);
 
   const handleSendMessage = async (content: string) => {
+    // Check daily limit
+    if (!canSendMessage) {
+      setShowLimitModal(true);
+      return;
+    }
+
     let conversationId = activeConversationId;
 
     // Create new conversation if none exists
@@ -182,8 +192,9 @@ export default function Chat() {
       if (!conversationId) return;
     }
 
-    // Add user message
+    // Add user message and increment usage
     await addMessage(conversationId, content, "user");
+    await incrementUsage();
 
     // Check for emergency keywords
     const isEmergency = emergencyKeywords.some((keyword) =>
@@ -478,6 +489,8 @@ export default function Chat() {
               onStop={handleStopGeneration}
               disabled={isTyping}
               isGenerating={isTyping}
+              remainingMessages={remainingMessages}
+              dailyLimit={dailyLimit}
             />
           </div>
         </div>
@@ -487,6 +500,13 @@ export default function Chat() {
       <UpdateLocationPrompt
         open={showLocationPrompt}
         onOpenChange={setShowLocationPrompt}
+      />
+
+      {/* Daily Limit Modal */}
+      <DailyLimitModal
+        open={showLimitModal}
+        onOpenChange={setShowLimitModal}
+        dailyLimit={dailyLimit}
       />
     </div>
   );

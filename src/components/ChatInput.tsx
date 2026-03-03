@@ -14,6 +14,8 @@ interface ChatInputProps {
   disabled?: boolean;
   isGenerating?: boolean;
   placeholder?: string;
+  remainingMessages?: number;
+  dailyLimit?: number;
 }
 
 export function ChatInput({
@@ -22,6 +24,8 @@ export function ChatInput({
   disabled = false,
   isGenerating = false,
   placeholder = "Ask Santra a health question...",
+  remainingMessages,
+  dailyLimit,
 }: ChatInputProps) {
   const [message, setMessage] = useState("");
   const [showPremiumModal, setShowPremiumModal] = useState(false);
@@ -120,9 +124,22 @@ export function ChatInput({
             </Button>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground text-center mt-2">
-          Santra provides educational health information only. Not a substitute for professional medical advice.
-        </p>
+        <div className="flex items-center justify-between mt-2 px-1">
+          <p className="text-xs text-muted-foreground">
+            Not a substitute for professional medical advice.
+          </p>
+          {remainingMessages !== undefined && dailyLimit !== undefined && (
+            <p className={`text-xs font-medium ${
+              remainingMessages <= 3
+                ? "text-destructive"
+                : remainingMessages <= 7
+                  ? "text-yellow-500"
+                  : "text-muted-foreground"
+            }`}>
+              {remainingMessages}/{dailyLimit} messages left today
+            </p>
+          )}
+        </div>
       </form>
       
       <PremiumUploadModal 

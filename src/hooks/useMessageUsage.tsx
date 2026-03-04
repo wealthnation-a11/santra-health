@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
+import { useSubscription } from "./useSubscription";
 
 const DAILY_LIMIT = 15;
 
@@ -8,6 +9,7 @@ export function useMessageUsage() {
   const [messageCount, setMessageCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
+  const { isPremium } = useSubscription();
 
   const getTodayDate = () => {
     return new Date().toISOString().split("T")[0];
@@ -79,8 +81,8 @@ export function useMessageUsage() {
     return true;
   }, [user, messageCount]);
 
-  const remainingMessages = Math.max(0, DAILY_LIMIT - messageCount);
-  const canSendMessage = remainingMessages > 0;
+  const remainingMessages = isPremium ? Infinity : Math.max(0, DAILY_LIMIT - messageCount);
+  const canSendMessage = isPremium || remainingMessages > 0;
 
   return {
     messageCount,

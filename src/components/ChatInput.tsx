@@ -128,7 +128,7 @@ export function ChatInput({
           <p className="text-xs text-muted-foreground">
             Not a substitute for professional medical advice.
           </p>
-          {remainingMessages !== undefined && dailyLimit !== undefined && (
+          {remainingMessages !== undefined && dailyLimit !== undefined && remainingMessages !== Infinity && (
             <p className={`text-xs font-medium ${
               remainingMessages <= 3
                 ? "text-destructive"
@@ -137,6 +137,11 @@ export function ChatInput({
                   : "text-muted-foreground"
             }`}>
               {remainingMessages}/{dailyLimit} messages left today
+            </p>
+          )}
+          {remainingMessages === Infinity && (
+            <p className="text-xs font-medium text-primary">
+              ✨ Premium — Unlimited messages
             </p>
           )}
         </div>

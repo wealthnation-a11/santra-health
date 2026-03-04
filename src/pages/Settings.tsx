@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SantraLogo } from "@/components/SantraLogo";
 import { VoiceUsageCard } from "@/components/settings/VoiceUsageCard";
 import { HealthProfileCard } from "@/components/settings/HealthProfileCard";
+import { IntegrationsCard } from "@/components/settings/IntegrationsCard";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -198,6 +199,9 @@ export default function Settings() {
 
         {/* Health Profile Section */}
         <HealthProfileCard />
+
+        {/* Integrations Section */}
+        <IntegrationsCard />
 
         {/* Voice Usage Section */}
         <section className="mb-6">

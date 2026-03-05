@@ -1,4 +1,4 @@
-import { Image, FileText, Mic, X, Sparkles, Crown } from "lucide-react";
+import { Image, FileText, Mic, Sparkles, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { toast } from "sonner";
+import { usePaystack } from "@/hooks/usePaystack";
 
 interface PremiumUploadModalProps {
   open: boolean;
@@ -14,11 +14,11 @@ interface PremiumUploadModalProps {
 }
 
 export function PremiumUploadModal({ open, onOpenChange }: PremiumUploadModalProps) {
+  const { initiatePayment } = usePaystack();
+
   const handleSubscribe = () => {
-    toast.info("Coming Soon!", {
-      description: "Premium features will be available soon. Stay tuned!",
-    });
     onOpenChange(false);
+    initiatePayment();
   };
 
   const features = [

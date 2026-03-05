@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Zap, MessageSquare, Image, FileText, Sparkles } from "lucide-react";
-import { toast } from "sonner";
+import { usePaystack } from "@/hooks/usePaystack";
 
 interface DailyLimitModalProps {
   open: boolean;
@@ -23,6 +23,8 @@ const premiumFeatures = [
 ];
 
 export function DailyLimitModal({ open, onOpenChange, dailyLimit }: DailyLimitModalProps) {
+  const { initiatePayment } = usePaystack();
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -54,8 +56,8 @@ export function DailyLimitModal({ open, onOpenChange, dailyLimit }: DailyLimitMo
             variant="santra"
             className="w-full"
             onClick={() => {
-              toast.info("Premium subscriptions coming soon! Stay tuned.");
               onOpenChange(false);
+              initiatePayment();
             }}
           >
             <Sparkles className="w-4 h-4 mr-2" />

@@ -7,10 +7,13 @@ import { VoiceInputButton } from "./VoiceInputButton";
 import { VoiceLanguageSelector } from "./VoiceLanguageSelector";
 import { StopGenerationButton } from "./StopGenerationButton";
 import { useVoiceInput } from "@/hooks/useVoiceInput";
+import { useSubscription } from "@/hooks/useSubscription";
+import { toast } from "sonner";
 
 interface ChatInputProps {
   onSend: (message: string) => void;
   onStop?: () => void;
+  onUploadFile?: (file: File) => void;
   disabled?: boolean;
   isGenerating?: boolean;
   placeholder?: string;
@@ -21,6 +24,7 @@ interface ChatInputProps {
 export function ChatInput({
   onSend,
   onStop,
+  onUploadFile,
   disabled = false,
   isGenerating = false,
   placeholder = "Ask Santra a health question...",
@@ -31,9 +35,9 @@ export function ChatInput({
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [voiceLanguage, setVoiceLanguage] = useState("en-US");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { isPremium } = useSubscription();
 
   const handleVoiceTranscript = useCallback((transcript: string) => {
-    // Directly send the voice message
     onSend(transcript);
   }, [onSend]);
 
@@ -61,6 +65,20 @@ export function ChatInput({
     }
   };
 
+  const handleUploadFile = (file: File) => {
+    if (!isPremium) {
+      setShowPremiumModal(true);
+      return;
+    }
+    onUploadFile?.(file);
+  };
+
+  const handleComingSoon = () => {
+    toast.info("Coming Soon!", {
+      description: "This feature will be available soon. Stay tuned!",
+    });
+  };
+
   // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
@@ -74,7 +92,6 @@ export function ChatInput({
       <form onSubmit={handleSubmit} className="relative">
         {/* Language selector row */}
         <div className="flex items-center justify-between mb-2">
-          {/* Stop Generation Button */}
           <div>
             {isGenerating && onStop && (
               <StopGenerationButton onStop={onStop} />
@@ -110,7 +127,8 @@ export function ChatInput({
               disabled={disabled}
             />
             <UploadMenu 
-              onSelectOption={() => setShowPremiumModal(true)} 
+              onUploadFile={handleUploadFile}
+              onComingSoon={handleComingSoon}
               disabled={disabled} 
             />
             <Button

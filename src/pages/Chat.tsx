@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Menu, X } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ChatSidebar } from "@/components/ChatSidebar";
 import { ChatMessage } from "@/components/ChatMessage";
@@ -328,6 +329,131 @@ export default function Chat() {
     await handleSendMessage(newContent);
   };
 
+  const handleUploadFile = async (file: File) => {
+    let conversationId = activeConversationId;
+
+    if (!conversationId) {
+      conversationId = await createConversation("Lab Result Analysis");
+      if (!conversationId) return;
+    }
+
+    // Add user message indicating file upload
+    const fileLabel = file.type.startsWith("image/") ? "🖼️ Lab Image" : "📄 Lab Document";
+    await addMessage(conversationId, `${fileLabel}: ${file.name}\n\nPlease analyze this lab result.`, "user");
+    await incrementUsage();
+
+    setIsTyping(true);
+    setStreamingContent("");
+    abortControllerRef.current = new AbortController();
+
+    try {
+      // Upload file to storage
+      const filePath = `${user!.id}/${Date.now()}_${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from("lab-uploads")
+        .upload(filePath, file);
+
+      if (uploadError) {
+        toast.error("Failed to upload file. Please try again.");
+        setIsTyping(false);
+        return;
+      }
+
+      // Call interpret-lab edge function
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+
+      const LAB_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/interpret-lab`;
+      const resp = await fetch(LAB_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({
+          filePath,
+          fileType: file.type,
+          preferredLanguage: profile?.preferred_language || "en",
+        }),
+        signal: abortControllerRef.current.signal,
+      });
+
+      if (!resp.ok) {
+        const errorData = await resp.json().catch(() => ({}));
+        toast.error(errorData.error || "Failed to analyze lab result.");
+        setIsTyping(false);
+        abortControllerRef.current = null;
+        return;
+      }
+
+      if (!resp.body) throw new Error("No response body");
+
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let textBuffer = "";
+      let fullResponse = "";
+      let streamDone = false;
+
+      while (!streamDone) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        textBuffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
+
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (line.startsWith(":") || line.trim() === "") continue;
+          if (!line.startsWith("data: ")) continue;
+
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") {
+            streamDone = true;
+            break;
+          }
+
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
+            if (content) {
+              fullResponse += content;
+              setStreamingContent(fullResponse);
+            }
+          } catch {
+            textBuffer = line + "\n" + textBuffer;
+            break;
+          }
+        }
+      }
+
+      reader.releaseLock();
+
+      setIsTyping(false);
+      setStreamingContent("");
+      abortControllerRef.current = null;
+
+      if (fullResponse.trim()) {
+        await addMessage(conversationId!, fullResponse, "assistant", false);
+      }
+
+      // Clean up uploaded file
+      await supabase.storage.from("lab-uploads").remove([filePath]);
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        toast.info("Analysis stopped");
+      } else {
+        console.error("Lab analysis error:", error);
+        toast.error("Failed to analyze lab result. Please try again.");
+      }
+      setIsTyping(false);
+      setStreamingContent("");
+      abortControllerRef.current = null;
+    }
+  };
+
   const handleConsultDoctor = () => {
     window.open("https://prescribly.app", "_blank");
   };
@@ -487,6 +613,7 @@ export default function Chat() {
             <ChatInput
               onSend={handleSendMessage}
               onStop={handleStopGeneration}
+              onUploadFile={handleUploadFile}
               disabled={isTyping}
               isGenerating={isTyping}
               remainingMessages={remainingMessages}

@@ -9,6 +9,7 @@ import { SantraLogo } from "@/components/SantraLogo";
 import { VoiceUsageCard } from "@/components/settings/VoiceUsageCard";
 import { HealthProfileCard } from "@/components/settings/HealthProfileCard";
 import { IntegrationsCard } from "@/components/settings/IntegrationsCard";
+import { SubscriptionCard } from "@/components/settings/SubscriptionCard";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -196,6 +197,9 @@ export default function Settings() {
             </Button>
           </div>
         </section>
+
+        {/* Subscription Section */}
+        <SubscriptionCard />
 
         {/* Health Profile Section */}
         <HealthProfileCard />

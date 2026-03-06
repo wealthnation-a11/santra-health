@@ -17,6 +17,7 @@ import Libraries from "./pages/Libraries";
 import LibraryChat from "./pages/LibraryChat";
 import FirstAid from "./pages/FirstAid";
 import Tools from "./pages/Tools";
+import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -109,6 +110,7 @@ const App = () => (
                   </ProtectedRoute>
                 }
               />
+              <Route path="/pricing" element={<Pricing />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

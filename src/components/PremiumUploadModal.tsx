@@ -74,7 +74,7 @@ export function PremiumUploadModal({ open, onOpenChange }: PremiumUploadModalPro
           <div className="bg-gradient-to-r from-primary/10 to-accent rounded-xl p-4 text-center">
             <div className="flex items-center justify-center gap-1 mb-2">
               <Sparkles className="h-5 w-5 text-primary" />
-              <span className="text-2xl font-bold text-foreground">$6</span>
+              <span className="text-2xl font-bold text-foreground">₦4,500</span>
               <span className="text-muted-foreground">/month</span>
             </div>
             <p className="text-sm text-muted-foreground">

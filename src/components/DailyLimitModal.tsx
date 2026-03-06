@@ -61,7 +61,7 @@ export function DailyLimitModal({ open, onOpenChange, dailyLimit }: DailyLimitMo
             }}
           >
             <Sparkles className="w-4 h-4 mr-2" />
-            Upgrade to Premium — $6/mo
+            Upgrade to Premium — ₦4,500/mo
           </Button>
           <p className="text-xs text-muted-foreground text-center">
             Your limit resets at midnight. Come back tomorrow for more free messages!

@@ -43,7 +43,7 @@ export function SubscriptionCard() {
               <CreditCard size={16} className="text-primary" />
               <div>
                 <p className="text-sm font-medium text-foreground">Santra Premium</p>
-                <p className="text-xs text-muted-foreground">$6/month • Billed via Paystack</p>
+                <p className="text-xs text-muted-foreground">₦4,500/month • Billed via Paystack</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -81,12 +81,12 @@ export function SubscriptionCard() {
               <span className="font-semibold text-foreground">Upgrade to Premium</span>
             </div>
             <p className="text-sm text-muted-foreground mb-3">
-              Unlock unlimited messages, lab result interpretation, image analysis, and more for just $6/month.
+              Unlock unlimited messages, lab result interpretation, image analysis, and more for just ₦4,500/month.
             </p>
             <div className="flex flex-col sm:flex-row gap-2">
               <Button variant="santra" size="sm" onClick={initiatePayment}>
                 <Crown size={14} className="mr-1" />
-                Upgrade — $6/mo
+                Upgrade — ₦4,500/mo
               </Button>
               <Button variant="outline" size="sm" onClick={() => navigate("/pricing")}>
                 Compare Plans

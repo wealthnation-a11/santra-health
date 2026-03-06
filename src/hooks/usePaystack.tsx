@@ -54,8 +54,8 @@ export function usePaystack() {
     const handler = window.PaystackPop.setup({
       key: PAYSTACK_PUBLIC_KEY,
       email: user.email,
-      amount: 600 * 100, // $6 in kobo (or smallest currency unit)
-      currency: "USD",
+      amount: 4500 * 100, // ₦4,500 in kobo
+      currency: "NGN",
       ref: `santra_${user.id}_${Date.now()}`,
       callback: async (response: { reference: string }) => {
         try {

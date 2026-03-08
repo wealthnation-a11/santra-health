@@ -88,7 +88,7 @@ export function SubscriptionCard() {
             <div className="flex flex-col sm:flex-row gap-2">
               <Button variant="santra" size="sm" onClick={initiatePayment}>
                 <Crown size={14} className="mr-1" />
-                Upgrade — ₦4,500/mo
+                Upgrade — {pricing.displayPrice}
               </Button>
               <Button variant="outline" size="sm" onClick={() => navigate("/pricing")}>
                 Compare Plans

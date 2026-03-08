@@ -153,7 +153,7 @@ export default function Pricing() {
           </h2>
           <div className="space-y-4">
             {[
-              { q: "How does billing work?", a: "You're charged ₦4,500 once per month via Paystack. You can pay with cards, bank transfers, or mobile money depending on your region." },
+              { q: "How does billing work?", a: `You're charged ${pricing.displayPrice} via Paystack. You can pay with cards, bank transfers, or mobile money depending on your region.` },
               { q: "Can I cancel anytime?", a: "Yes! You can cancel your subscription at any time from your Settings page. You'll retain premium access until your billing period ends." },
               { q: "What payment methods are accepted?", a: "We accept Visa, Mastercard, Verve, bank transfers, and mobile money through Paystack — Africa's leading payment platform." },
               { q: "Is my payment information secure?", a: "Absolutely. All payments are processed securely through Paystack. We never store your card details." },

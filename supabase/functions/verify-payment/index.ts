@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
     }
 
     const userId = claimsData.claims.sub;
-    const { reference } = await req.json();
+    const { reference, planType } = await req.json();
 
     if (!reference) {
       return new Response(JSON.stringify({ error: "Missing payment reference" }), {
@@ -67,34 +67,72 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Payment verified — upsert subscription to premium
+    // Determine plan and plan_type from reference
+    const ref = reference as string;
+    let plan = "premium";
+    let dbPlanType = "chat";
+
+    if (planType === "edu") {
+      dbPlanType = "edu";
+      if (ref.includes("edu_pro")) {
+        plan = "edu_pro";
+      } else if (ref.includes("edu_starter")) {
+        plan = "edu_starter";
+      }
+    }
+
+    // Payment verified — upsert subscription
     const serviceClient = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const { error: upsertError } = await serviceClient
+    // Check if edu subscription exists
+    const { data: existingSub } = await serviceClient
       .from("subscriptions")
-      .upsert(
-        {
-          user_id: userId,
-          plan: "premium",
+      .select("id")
+      .eq("user_id", userId)
+      .eq("plan_type", dbPlanType)
+      .maybeSingle();
+
+    if (existingSub) {
+      const { error: updateError } = await serviceClient
+        .from("subscriptions")
+        .update({
+          plan,
           status: "active",
           updated_at: new Date().toISOString(),
-        },
-        { onConflict: "user_id" }
-      );
+        })
+        .eq("id", existingSub.id);
 
-    if (upsertError) {
-      console.error("Subscription upsert error:", upsertError);
-      return new Response(
-        JSON.stringify({ error: "Failed to update subscription" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      if (updateError) {
+        console.error("Subscription update error:", updateError);
+        return new Response(
+          JSON.stringify({ error: "Failed to update subscription" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    } else {
+      const { error: insertError } = await serviceClient
+        .from("subscriptions")
+        .insert({
+          user_id: userId,
+          plan,
+          plan_type: dbPlanType,
+          status: "active",
+        });
+
+      if (insertError) {
+        console.error("Subscription insert error:", insertError);
+        return new Response(
+          JSON.stringify({ error: "Failed to create subscription" }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
     }
 
     return new Response(
-      JSON.stringify({ success: true, plan: "premium" }),
+      JSON.stringify({ success: true, plan, planType: dbPlanType }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {

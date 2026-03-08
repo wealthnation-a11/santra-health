@@ -172,6 +172,51 @@ export const countries: Country[] = [
     ]
   },
   {
+    name: "Rwanda",
+    code: "RW",
+    states: ["Kigali", "Eastern", "Northern", "Southern", "Western"]
+  },
+  {
+    name: "Cameroon",
+    code: "CM",
+    states: ["Centre", "Littoral", "West", "Northwest", "Southwest", "North", "Far North", "Adamawa", "East", "South"]
+  },
+  {
+    name: "Senegal",
+    code: "SN",
+    states: ["Dakar", "Thiès", "Saint-Louis", "Diourbel", "Kaolack", "Ziguinchor", "Louga", "Fatick"]
+  },
+  {
+    name: "Ivory Coast",
+    code: "CI",
+    states: ["Abidjan", "Bouaké", "Yamoussoukro", "Daloa", "San-Pédro", "Korhogo", "Man"]
+  },
+  {
+    name: "Angola",
+    code: "AO",
+    states: ["Luanda", "Benguela", "Huambo", "Cabinda", "Huíla", "Malanje", "Cunene"]
+  },
+  {
+    name: "Mozambique",
+    code: "MZ",
+    states: ["Maputo", "Gaza", "Inhambane", "Sofala", "Manica", "Tete", "Zambezia", "Nampula"]
+  },
+  {
+    name: "Zambia",
+    code: "ZM",
+    states: ["Lusaka", "Copperbelt", "Southern", "Eastern", "Northern", "Central", "Western"]
+  },
+  {
+    name: "Zimbabwe",
+    code: "ZW",
+    states: ["Harare", "Bulawayo", "Manicaland", "Mashonaland", "Matabeleland", "Midlands", "Masvingo"]
+  },
+  {
+    name: "Botswana",
+    code: "BW",
+    states: ["Gaborone", "Francistown", "Maun", "Serowe", "Kasane", "Molepolole"]
+  },
+  {
     name: "Other",
     code: "XX",
     states: ["Other"]

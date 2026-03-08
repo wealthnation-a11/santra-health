@@ -7,7 +7,13 @@ export interface PricingTier {
   displayPrice: string;
 }
 
-const AFRICAN_COUNTRY_CODES = ["NG", "GH", "ZA", "KE", "EG", "TZ", "UG", "ET"];
+const AFRICAN_COUNTRY_CODES = [
+  "NG", "GH", "ZA", "KE", "EG", "TZ", "UG", "ET",
+  "RW", "CM", "SN", "CI", "AO", "MZ", "ZW", "BW",
+  "NA", "ZM", "MW", "MG", "CD", "ML", "BF", "NE",
+  "TD", "GN", "BJ", "TG", "SL", "LR", "MR", "GM",
+  "GA", "CG", "DJ", "ER", "SS", "SO", "LS", "SZ",
+];
 
 const pricingMap: Record<string, PricingTier> = {
   Nigeria: { amount: 450000, currency: "NGN", symbol: "₦", displayPrice: "₦4,500/mo" },

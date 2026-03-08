@@ -83,7 +83,7 @@ export function SubscriptionCard() {
               <span className="font-semibold text-foreground">Upgrade to Premium</span>
             </div>
             <p className="text-sm text-muted-foreground mb-3">
-              Unlock unlimited messages, lab result interpretation, image analysis, and more for just ₦4,500/month.
+              Unlock unlimited messages, lab result interpretation, image analysis, and more for just {pricing.displayPrice}.
             </p>
             <div className="flex flex-col sm:flex-row gap-2">
               <Button variant="santra" size="sm" onClick={initiatePayment}>

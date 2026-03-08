@@ -5,11 +5,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { AdminRoute } from "@/components/AdminRoute";
+
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Index from "./pages/Index";
 import Chat from "./pages/Chat";
-import Admin from "./pages/Admin";
+
 import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
 import Settings from "./pages/Settings";
@@ -115,14 +115,6 @@ const App = () => (
               />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/pricing/education" element={<EduPricing />} />
-              <Route
-                path="/admin"
-                element={
-                  <AdminRoute>
-                    <Admin />
-                  </AdminRoute>
-                }
-              />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>

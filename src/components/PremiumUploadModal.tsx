@@ -7,7 +7,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { usePaystack } from "@/hooks/usePaystack";
-import { usePricing } from "@/hooks/usePricing";
 
 interface PremiumUploadModalProps {
   open: boolean;
@@ -15,12 +14,11 @@ interface PremiumUploadModalProps {
 }
 
 export function PremiumUploadModal({ open, onOpenChange }: PremiumUploadModalProps) {
-  const { initiatePayment } = usePaystack();
-  const pricing = usePricing();
+  const { initiatePayment, pricing } = usePaystack();
 
-  const handleSubscribe = () => {
+  const handleSubscribe = (interval: "monthly" | "annual") => {
     onOpenChange(false);
-    initiatePayment();
+    initiatePayment(interval);
   };
 
   const features = [
@@ -74,13 +72,15 @@ export function PremiumUploadModal({ open, onOpenChange }: PremiumUploadModalPro
           </div>
 
           <div className="bg-gradient-to-r from-primary/10 to-accent rounded-xl p-4 text-center">
-            <div className="flex items-center justify-center gap-1 mb-2">
+            <p className="text-sm text-muted-foreground mb-1">
+              Starting at
+            </p>
+            <div className="flex items-center justify-center gap-1 mb-1">
               <Sparkles className="h-5 w-5 text-primary" />
-              <span className="text-2xl font-bold text-foreground">{pricing.symbol}{pricing.amount / 100}</span>
-              <span className="text-muted-foreground">/month</span>
+              <span className="text-2xl font-bold text-foreground">{pricing.plan.monthly.displayPrice}</span>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Cancel anytime. No commitment required.
+            <p className="text-xs text-muted-foreground">
+              or {pricing.plan.annual.displayPrice} — {pricing.annualSavingsLabel}
             </p>
           </div>
 
@@ -88,10 +88,17 @@ export function PremiumUploadModal({ open, onOpenChange }: PremiumUploadModalPro
             variant="santra"
             className="w-full"
             size="lg"
-            onClick={handleSubscribe}
+            onClick={() => handleSubscribe("monthly")}
           >
             <Crown className="mr-2 h-4 w-4" />
-            Subscribe Now
+            Subscribe Monthly — {pricing.plan.monthly.displayPrice}
+          </Button>
+          <Button
+            variant="outline"
+            className="w-full"
+            onClick={() => handleSubscribe("annual")}
+          >
+            Subscribe Annually — {pricing.plan.annual.displayPrice}
           </Button>
 
           <p className="text-xs text-muted-foreground text-center">

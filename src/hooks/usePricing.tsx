@@ -1,8 +1,30 @@
-import { useMemo } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { useAuth } from "./useAuth";
-import { getPricingForCountry, type PricingTier } from "@/data/pricing";
+import { getPricingPlanForCountry, type PricingTier, type PricingPlan, type BillingInterval } from "@/data/pricing";
 
-export function usePricing(): PricingTier {
+export function usePricing() {
   const { profile } = useAuth();
-  return useMemo(() => getPricingForCountry(profile?.country), [profile?.country]);
+  const [interval, setInterval] = useState<BillingInterval>("monthly");
+
+  const plan: PricingPlan = useMemo(
+    () => getPricingPlanForCountry(profile?.country),
+    [profile?.country]
+  );
+
+  const activeTier: PricingTier = plan[interval];
+
+  const toggleInterval = useCallback(() => {
+    setInterval((prev) => (prev === "monthly" ? "annual" : "monthly"));
+  }, []);
+
+  return {
+    ...activeTier,
+    interval,
+    setInterval,
+    toggleInterval,
+    plan,
+    annualSavingsLabel: plan.annualSavingsLabel,
+  };
 }
+
+export type { PricingTier, BillingInterval };

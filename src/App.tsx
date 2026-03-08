@@ -18,6 +18,7 @@ import LibraryChat from "./pages/LibraryChat";
 import FirstAid from "./pages/FirstAid";
 import Tools from "./pages/Tools";
 import Pricing from "./pages/Pricing";
+import EduPricing from "./pages/EduPricing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();

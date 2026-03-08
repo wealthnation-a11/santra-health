@@ -353,6 +353,17 @@ export default function LibraryChat() {
           />
         </div>
       </div>
+      {library && (
+        <EduUpgradeModal
+          open={showUpgradeModal}
+          onOpenChange={(open) => {
+            setShowUpgradeModal(open);
+            if (!open) navigate("/libraries");
+          }}
+          requiredTier={library.tier}
+          libraryName={library.name}
+        />
+      )}
     </div>
   );
 }

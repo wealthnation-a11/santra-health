@@ -25,6 +25,7 @@ const premiumFeatures = [
 
 export function DailyLimitModal({ open, onOpenChange, dailyLimit }: DailyLimitModalProps) {
   const { initiatePayment } = usePaystack();
+  const pricing = usePricing();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

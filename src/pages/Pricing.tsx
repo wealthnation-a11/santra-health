@@ -140,7 +140,7 @@ export default function Pricing() {
             ) : (
               <Button variant="santra" size="lg" onClick={handleUpgrade} disabled={isLoading}>
                 <Sparkles size={16} className="mr-1" />
-                Upgrade Now — ₦4,500/mo
+                Upgrade Now — {pricing.displayPrice}
               </Button>
             )}
           </div>

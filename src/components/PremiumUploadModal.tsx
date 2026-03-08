@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { usePaystack } from "@/hooks/usePaystack";
+import { usePricing } from "@/hooks/usePricing";
 
 interface PremiumUploadModalProps {
   open: boolean;

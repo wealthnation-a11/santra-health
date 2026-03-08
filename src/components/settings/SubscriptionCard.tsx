@@ -45,7 +45,7 @@ export function SubscriptionCard() {
               <CreditCard size={16} className="text-primary" />
               <div>
                 <p className="text-sm font-medium text-foreground">Santra Premium</p>
-                <p className="text-xs text-muted-foreground">₦4,500/month • Billed via Paystack</p>
+                <p className="text-xs text-muted-foreground">{pricing.displayPrice} • Billed via Paystack</p>
               </div>
             </div>
             <div className="flex items-center gap-3">

@@ -7,8 +7,10 @@ import { ChatInput } from "@/components/ChatInput";
 import { TypingIndicator } from "@/components/TypingIndicator";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { EduUpgradeModal } from "@/components/EduUpgradeModal";
 import { useAuth } from "@/hooks/useAuth";
 import { useLibraryConversations } from "@/hooks/useLibraryConversations";
+import { useEduSubscription } from "@/hooks/useEduSubscription";
 import { getLibraryById } from "@/data/libraries";
 import { findLastIndex } from "@/lib/arrayUtils";
 import { toast } from "sonner";
@@ -30,14 +32,29 @@ export default function LibraryChat() {
   const { libraryId } = useParams<{ libraryId: string }>();
   const navigate = useNavigate();
   const { profile } = useAuth();
+  const { isEduStarter, isEduPro } = useEduSubscription();
   
   const [isTyping, setIsTyping] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const library = libraryId ? getLibraryById(libraryId) : undefined;
   const IconComponent = library ? (iconMap[library.icon] || BookOpen) : BookOpen;
+
+  // Check access
+  const canAccess = library ? (
+    library.tier === "free" ||
+    (library.tier === "starter" && isEduStarter) ||
+    (library.tier === "pro" && isEduPro)
+  ) : false;
+
+  useEffect(() => {
+    if (library && !canAccess) {
+      setShowUpgradeModal(true);
+    }
+  }, [library, canAccess]);
 
   const {
     activeConversation,
@@ -336,6 +353,17 @@ export default function LibraryChat() {
           />
         </div>
       </div>
+      {library && (
+        <EduUpgradeModal
+          open={showUpgradeModal}
+          onOpenChange={(open) => {
+            setShowUpgradeModal(open);
+            if (!open) navigate("/libraries");
+          }}
+          requiredTier={library.tier}
+          libraryName={library.name}
+        />
+      )}
     </div>
   );
 }

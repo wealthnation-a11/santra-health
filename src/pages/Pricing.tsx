@@ -25,6 +25,7 @@ export default function Pricing() {
   const { user } = useAuth();
   const { isPremium, isLoading } = useSubscription();
   const { initiatePayment } = usePaystack();
+  const pricing = usePricing();
 
   const handleUpgrade = () => {
     if (!user) {

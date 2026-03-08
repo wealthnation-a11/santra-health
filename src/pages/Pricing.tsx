@@ -119,7 +119,7 @@ export default function Pricing() {
               <p className="text-muted-foreground text-sm">Full access, no limits</p>
             </div>
             <div className="mb-6">
-              <span className="text-4xl font-bold text-foreground">₦4,500</span>
+              <span className="text-4xl font-bold text-foreground">{pricing.symbol}{pricing.amount / 100}</span>
               <span className="text-muted-foreground">/month</span>
             </div>
             <ul className="space-y-3 mb-8 flex-1">

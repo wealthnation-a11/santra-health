@@ -16,6 +16,7 @@ interface PremiumUploadModalProps {
 
 export function PremiumUploadModal({ open, onOpenChange }: PremiumUploadModalProps) {
   const { initiatePayment } = usePaystack();
+  const pricing = usePricing();
 
   const handleSubscribe = () => {
     onOpenChange(false);

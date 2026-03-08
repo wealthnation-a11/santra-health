@@ -4,6 +4,7 @@ import { useSubscription } from "./useSubscription";
 import { usePricing } from "./usePricing";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import type { BillingInterval } from "@/data/pricing";
 
 const PAYSTACK_PUBLIC_KEY = "pk_live_06073764b30e0548a65cacd81f4ac69e18324947";
 
@@ -42,7 +43,7 @@ export function usePaystack() {
     return result;
   }, []);
 
-  const initiatePayment = useCallback(() => {
+  const initiatePayment = useCallback((overrideInterval?: BillingInterval) => {
     if (!user?.email) {
       toast.error("Please log in to upgrade");
       return;
@@ -53,12 +54,15 @@ export function usePaystack() {
       return;
     }
 
+    const interval = overrideInterval || pricing.interval;
+    const tier = pricing.plan[interval];
+
     const handler = window.PaystackPop.setup({
       key: PAYSTACK_PUBLIC_KEY,
       email: user.email,
-      amount: pricing.amount,
-      currency: pricing.currency,
-      ref: `santra_${user.id}_${Date.now()}`,
+      amount: tier.amount,
+      currency: tier.currency,
+      ref: `santra_${interval}_${user.id}_${Date.now()}`,
       callback: async (response: { reference: string }) => {
         try {
           toast.loading("Verifying payment...", { id: "payment-verify" });

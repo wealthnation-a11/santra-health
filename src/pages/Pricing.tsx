@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { usePaystack } from "@/hooks/usePaystack";
-import { usePricing } from "@/hooks/usePricing";
+import { Badge } from "@/components/ui/badge";
 
 const features = [
   { label: "Daily messages", free: "15 per day", premium: "Unlimited", icon: MessageSquare },
@@ -24,15 +24,17 @@ export default function Pricing() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { isPremium, isLoading } = useSubscription();
-  const { initiatePayment } = usePaystack();
-  const pricing = usePricing();
+  const { initiatePayment, pricing } = usePaystack();
+  const { interval, setInterval, plan, annualSavingsLabel } = pricing;
+
+  const activeTier = plan[interval];
 
   const handleUpgrade = () => {
     if (!user) {
       navigate("/auth");
       return;
     }
-    initiatePayment();
+    initiatePayment(interval);
   };
 
   return (
@@ -64,9 +66,36 @@ export default function Pricing() {
           <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground mb-4">
             Choose Your Plan
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
             Start free and upgrade when you need more. Cancel anytime.
           </p>
+
+          {/* Billing Toggle */}
+          <div className="inline-flex items-center gap-1 bg-muted p-1 rounded-full">
+            <button
+              onClick={() => setInterval("monthly")}
+              className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
+                interval === "monthly"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Monthly
+            </button>
+            <button
+              onClick={() => setInterval("annual")}
+              className={`px-5 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
+                interval === "annual"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Annual
+              <Badge variant="secondary" className="bg-primary/10 text-primary text-[10px] px-1.5 py-0">
+                2 months free
+              </Badge>
+            </button>
+          </div>
         </div>
 
         {/* Pricing Cards */}
@@ -119,8 +148,19 @@ export default function Pricing() {
               <p className="text-muted-foreground text-sm">Full access, no limits</p>
             </div>
             <div className="mb-6">
-              <span className="text-4xl font-bold text-foreground">{pricing.symbol}{pricing.amount / 100}</span>
-              <span className="text-muted-foreground">/month</span>
+              <span className="text-4xl font-bold text-foreground">
+                {activeTier.symbol}{activeTier.amount / 100}
+              </span>
+              <span className="text-muted-foreground">
+                /{interval === "monthly" ? "month" : "year"}
+              </span>
+              {interval === "annual" && (
+                <div className="mt-1">
+                  <Badge variant="secondary" className="bg-primary/10 text-primary text-xs">
+                    {annualSavingsLabel}
+                  </Badge>
+                </div>
+              )}
             </div>
             <ul className="space-y-3 mb-8 flex-1">
               {features.map((f) => (
@@ -140,7 +180,7 @@ export default function Pricing() {
             ) : (
               <Button variant="santra" size="lg" onClick={handleUpgrade} disabled={isLoading}>
                 <Sparkles size={16} className="mr-1" />
-                Upgrade Now — {pricing.displayPrice}
+                Upgrade Now — {activeTier.displayPrice}
               </Button>
             )}
           </div>
@@ -153,7 +193,7 @@ export default function Pricing() {
           </h2>
           <div className="space-y-4">
             {[
-              { q: "How does billing work?", a: `You're charged ${pricing.displayPrice} via Paystack. You can pay with cards, bank transfers, or mobile money depending on your region.` },
+              { q: "How does billing work?", a: `You can choose monthly (${plan.monthly.displayPrice}) or annual (${plan.annual.displayPrice}) billing via Paystack. Annual saves you 2 months!` },
               { q: "Can I cancel anytime?", a: "Yes! You can cancel your subscription at any time from your Settings page. You'll retain premium access until your billing period ends." },
               { q: "What payment methods are accepted?", a: "We accept Visa, Mastercard, Verve, bank transfers, and mobile money through Paystack — Africa's leading payment platform." },
               { q: "Is my payment information secure?", a: "Absolutely. All payments are processed securely through Paystack. We never store your card details." },

@@ -186,6 +186,23 @@ export default function Pricing() {
           </div>
         </div>
 
+        {/* Education Plans CTA */}
+        <div className="max-w-3xl mx-auto mb-16 bg-accent/50 border border-border rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-primary/10">
+              <GraduationCap size={22} className="text-primary" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground">Looking for Educational Plans?</h3>
+              <p className="text-sm text-muted-foreground">Unlock advanced learning libraries, case studies, and AI-powered study tools.</p>
+            </div>
+          </div>
+          <Button variant="outline" onClick={() => navigate("/pricing/education")} className="shrink-0 gap-2">
+            <Sparkles size={14} />
+            View Education Plans
+          </Button>
+        </div>
+
         {/* FAQ */}
         <div className="max-w-2xl mx-auto">
           <h2 className="text-2xl font-display font-bold text-foreground text-center mb-8">

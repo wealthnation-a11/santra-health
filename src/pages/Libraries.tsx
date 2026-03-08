@@ -75,6 +75,29 @@ export default function Libraries() {
           </p>
         </div>
 
+        {/* Current Plan Banner */}
+        <div className="mb-6 p-4 rounded-xl border border-border bg-card flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-lg ${isEduPro ? "bg-amber-500/10" : isEduStarter ? "bg-primary/10" : "bg-muted"}`}>
+              {isEduPro ? <Crown size={18} className="text-amber-500" /> : isEduStarter ? <Sparkles size={18} className="text-primary" /> : <BookOpen size={18} className="text-muted-foreground" />}
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                {isEduPro ? "Pro Plan" : isEduStarter ? "Starter Plan" : "Free Plan"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {isEduPro ? "All libraries unlocked" : isEduStarter ? "Starter libraries unlocked" : "3 free libraries available"}
+              </p>
+            </div>
+          </div>
+          {!isEduPro && (
+            <Button variant="outline" size="sm" onClick={() => navigate("/pricing/education")} className="gap-1.5">
+              <Sparkles size={14} />
+              {isEduStarter ? "Upgrade to Pro" : "View Plans"}
+            </Button>
+          )}
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {libraries.map((library) => {
             const IconComponent = iconMap[library.icon] || BookOpen;

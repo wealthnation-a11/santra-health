@@ -1,4 +1,4 @@
-import { Check, X, Crown, Sparkles, ArrowLeft, MessageSquare, Image, FileText, Mic, Brain, Zap, Shield } from "lucide-react";
+import { Check, X, Crown, Sparkles, ArrowLeft, MessageSquare, Image, FileText, Mic, Brain, Zap, Shield, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SantraLogo } from "@/components/SantraLogo";
 import { useNavigate } from "react-router-dom";
@@ -184,6 +184,23 @@ export default function Pricing() {
               </Button>
             )}
           </div>
+        </div>
+
+        {/* Education Plans CTA */}
+        <div className="max-w-3xl mx-auto mb-16 bg-accent/50 border border-border rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl bg-primary/10">
+              <GraduationCap size={22} className="text-primary" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground">Looking for Educational Plans?</h3>
+              <p className="text-sm text-muted-foreground">Unlock advanced learning libraries, case studies, and AI-powered study tools.</p>
+            </div>
+          </div>
+          <Button variant="outline" onClick={() => navigate("/pricing/education")} className="shrink-0 gap-2">
+            <Sparkles size={14} />
+            View Education Plans
+          </Button>
         </div>
 
         {/* FAQ */}

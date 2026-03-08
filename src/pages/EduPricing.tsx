@@ -17,7 +17,7 @@ export default function EduPricing() {
   const { profile } = useAuth();
   const { eduPlan } = useEduSubscription();
   const { initiatePayment } = usePaystack();
-  const [interval, setInterval] = useState<EduBillingInterval>("monthly");
+  const [interval, setInterval] = useState<BillingInterval>("monthly");
 
   const pricing = getEduPricingForCountry(profile?.country);
   const starterTier = pricing.starter[interval];

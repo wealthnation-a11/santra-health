@@ -32,14 +32,29 @@ export default function LibraryChat() {
   const { libraryId } = useParams<{ libraryId: string }>();
   const navigate = useNavigate();
   const { profile } = useAuth();
+  const { isEduStarter, isEduPro } = useEduSubscription();
   
   const [isTyping, setIsTyping] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const library = libraryId ? getLibraryById(libraryId) : undefined;
   const IconComponent = library ? (iconMap[library.icon] || BookOpen) : BookOpen;
+
+  // Check access
+  const canAccess = library ? (
+    library.tier === "free" ||
+    (library.tier === "starter" && isEduStarter) ||
+    (library.tier === "pro" && isEduPro)
+  ) : false;
+
+  useEffect(() => {
+    if (library && !canAccess) {
+      setShowUpgradeModal(true);
+    }
+  }, [library, canAccess]);
 
   const {
     activeConversation,

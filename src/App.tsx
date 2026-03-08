@@ -9,7 +9,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Index from "./pages/Index";
 import Chat from "./pages/Chat";
-import Admin from "./pages/Admin";
+
 import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
 import Settings from "./pages/Settings";

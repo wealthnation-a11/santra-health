@@ -1,4 +1,4 @@
-import { Check, X, Crown, Sparkles, ArrowLeft, MessageSquare, Image, FileText, Mic, Brain, Zap, Shield } from "lucide-react";
+import { Check, X, Crown, Sparkles, ArrowLeft, MessageSquare, Image, FileText, Mic, Brain, Zap, Shield, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SantraLogo } from "@/components/SantraLogo";
 import { useNavigate } from "react-router-dom";

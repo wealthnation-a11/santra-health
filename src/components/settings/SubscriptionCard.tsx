@@ -2,6 +2,7 @@ import { Crown, Sparkles, CreditCard, Calendar, ExternalLink } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { useSubscription } from "@/hooks/useSubscription";
 import { usePaystack } from "@/hooks/usePaystack";
+import { usePricing } from "@/hooks/usePricing";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 

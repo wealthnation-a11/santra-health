@@ -9,7 +9,8 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 import { useEduSubscription } from "@/hooks/useEduSubscription";
 import { usePaystack } from "@/hooks/usePaystack";
-import { getEduPricingForCountry, type EduBillingInterval } from "@/data/eduPricing";
+import { getEduPricingForCountry } from "@/data/eduPricing";
+import type { BillingInterval } from "@/data/pricing";
 
 export default function EduPricing() {
   const navigate = useNavigate();

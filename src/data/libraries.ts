@@ -1,9 +1,12 @@
+export type LibraryTier = "free" | "starter" | "pro";
+
 export interface Library {
   id: string;
   name: string;
   description: string;
   icon: string;
   color: string;
+  tier: LibraryTier;
   systemPrompt: string;
 }
 
@@ -14,6 +17,7 @@ export const libraries: Library[] = [
     description: "Define medical terms, abbreviations, and acronyms clearly.",
     icon: "BookOpen",
     color: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+    tier: "free",
     systemPrompt: `You are Santra operating inside the Medical Dictionary Library.
 
 Only provide:
@@ -35,6 +39,7 @@ Make the suggestions contextually relevant to what you just discussed. Keep each
     description: "Learn about body structure and organ functions.",
     icon: "Heart",
     color: "bg-red-500/10 text-red-600 dark:text-red-400",
+    tier: "free",
     systemPrompt: `You are Santra inside the Anatomy & Physiology Library.
 
 Explain:
@@ -57,6 +62,7 @@ Make the suggestions contextually relevant to what you just discussed. Keep each
     description: "Educational overview of illnesses, causes, and prevention.",
     icon: "Activity",
     color: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
+    tier: "free",
     systemPrompt: `You are Santra inside the Diseases & Conditions Library.
 
 You may explain:
@@ -82,6 +88,7 @@ Make the suggestions contextually relevant to what you just discussed. Keep each
     description: "Learn about drug classes, mechanisms, and effects.",
     icon: "Pill",
     color: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
+    tier: "starter",
     systemPrompt: `You are Santra inside the Pharmacology Library.
 
 You may explain:
@@ -108,6 +115,7 @@ Make the suggestions contextually relevant to what you just discussed. Keep each
     description: "Understand lab tests, normal ranges, and interpretations.",
     icon: "TestTube",
     color: "bg-green-500/10 text-green-600 dark:text-green-400",
+    tier: "starter",
     systemPrompt: `You are Santra inside the Laboratory Tests Library.
 
 Explain:
@@ -129,6 +137,7 @@ Make the suggestions contextually relevant to what you just discussed. Keep each
     description: "Practice with hypothetical case scenarios for students.",
     icon: "FileText",
     color: "bg-teal-500/10 text-teal-600 dark:text-teal-400",
+    tier: "pro",
     systemPrompt: `You are Santra inside the Clinical Case Learning Library.
 
 Use ONLY hypothetical scenarios.
@@ -152,6 +161,7 @@ Make the suggestions contextually relevant to what you just discussed. Keep each
     description: "Summaries, mnemonics, and exam guidance for students.",
     icon: "GraduationCap",
     color: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400",
+    tier: "starter",
     systemPrompt: `You are Santra inside the Study & Exam Prep Library.
 
 Provide:
@@ -174,6 +184,7 @@ Make the suggestions contextually relevant to what you just discussed. Keep each
     description: "Learn to read and understand medical research papers.",
     icon: "Search",
     color: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400",
+    tier: "pro",
     systemPrompt: `You are Santra inside the Research & Evidence Basics Library.
 
 Explain:

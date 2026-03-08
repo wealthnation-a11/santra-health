@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 export function SubscriptionCard() {
   const { plan, isPremium, isLoading } = useSubscription();
   const { initiatePayment } = usePaystack();
+  const pricing = usePricing();
   const navigate = useNavigate();
 
   if (isLoading) {

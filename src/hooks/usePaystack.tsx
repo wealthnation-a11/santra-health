@@ -48,8 +48,8 @@ export function usePaystack() {
     planType?: string,
     planKey?: string,
     overrideAmount?: number,
-    overrideCurrency?: string,
-  ) => {
+    overrideCurrency?: string
+  ): void => {
     if (!user?.email) {
       toast.error("Please log in to upgrade");
       return;

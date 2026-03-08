@@ -9,14 +9,15 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 import { useEduSubscription } from "@/hooks/useEduSubscription";
 import { usePaystack } from "@/hooks/usePaystack";
-import { getEduPricingForCountry, type EduBillingInterval } from "@/data/eduPricing";
+import { getEduPricingForCountry } from "@/data/eduPricing";
+import type { BillingInterval } from "@/data/pricing";
 
 export default function EduPricing() {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const { eduPlan } = useEduSubscription();
   const { initiatePayment } = usePaystack();
-  const [interval, setInterval] = useState<EduBillingInterval>("monthly");
+  const [interval, setInterval] = useState<BillingInterval>("monthly");
 
   const pricing = getEduPricingForCountry(profile?.country);
   const starterTier = pricing.starter[interval];

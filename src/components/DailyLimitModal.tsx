@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Zap, MessageSquare, Image, FileText, Sparkles } from "lucide-react";
 import { usePaystack } from "@/hooks/usePaystack";
+import { usePricing } from "@/hooks/usePricing";
 
 interface DailyLimitModalProps {
   open: boolean;

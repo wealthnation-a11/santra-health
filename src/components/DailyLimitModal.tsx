@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Zap, MessageSquare, Image, FileText, Sparkles } from "lucide-react";
 import { usePaystack } from "@/hooks/usePaystack";
+import { usePricing } from "@/hooks/usePricing";
 
 interface DailyLimitModalProps {
   open: boolean;
@@ -24,6 +25,7 @@ const premiumFeatures = [
 
 export function DailyLimitModal({ open, onOpenChange, dailyLimit }: DailyLimitModalProps) {
   const { initiatePayment } = usePaystack();
+  const pricing = usePricing();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -61,7 +63,7 @@ export function DailyLimitModal({ open, onOpenChange, dailyLimit }: DailyLimitMo
             }}
           >
             <Sparkles className="w-4 h-4 mr-2" />
-            Upgrade to Premium — ₦4,500/mo
+            Upgrade to Premium — {pricing.displayPrice}
           </Button>
           <p className="text-xs text-muted-foreground text-center">
             Your limit resets at midnight. Come back tomorrow for more free messages!

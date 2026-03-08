@@ -2,12 +2,14 @@ import { Crown, Sparkles, CreditCard, Calendar, ExternalLink } from "lucide-reac
 import { Button } from "@/components/ui/button";
 import { useSubscription } from "@/hooks/useSubscription";
 import { usePaystack } from "@/hooks/usePaystack";
+import { usePricing } from "@/hooks/usePricing";
 import { useNavigate } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 
 export function SubscriptionCard() {
   const { plan, isPremium, isLoading } = useSubscription();
   const { initiatePayment } = usePaystack();
+  const pricing = usePricing();
   const navigate = useNavigate();
 
   if (isLoading) {
@@ -43,7 +45,7 @@ export function SubscriptionCard() {
               <CreditCard size={16} className="text-primary" />
               <div>
                 <p className="text-sm font-medium text-foreground">Santra Premium</p>
-                <p className="text-xs text-muted-foreground">₦4,500/month • Billed via Paystack</p>
+                <p className="text-xs text-muted-foreground">{pricing.displayPrice} • Billed via Paystack</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -81,12 +83,12 @@ export function SubscriptionCard() {
               <span className="font-semibold text-foreground">Upgrade to Premium</span>
             </div>
             <p className="text-sm text-muted-foreground mb-3">
-              Unlock unlimited messages, lab result interpretation, image analysis, and more for just ₦4,500/month.
+              Unlock unlimited messages, lab result interpretation, image analysis, and more for just {pricing.displayPrice}.
             </p>
             <div className="flex flex-col sm:flex-row gap-2">
               <Button variant="santra" size="sm" onClick={initiatePayment}>
                 <Crown size={14} className="mr-1" />
-                Upgrade — ₦4,500/mo
+                Upgrade — {pricing.displayPrice}
               </Button>
               <Button variant="outline" size="sm" onClick={() => navigate("/pricing")}>
                 Compare Plans

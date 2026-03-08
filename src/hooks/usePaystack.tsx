@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { useAuth } from "./useAuth";
 import { useSubscription } from "./useSubscription";
+import { usePricing } from "./usePricing";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -17,6 +18,7 @@ declare global {
 export function usePaystack() {
   const { user } = useAuth();
   const { refetch } = useSubscription();
+  const pricing = usePricing();
 
   const verifyPayment = useCallback(async (reference: string) => {
     const { data: sessionData } = await supabase.auth.getSession();
@@ -54,8 +56,8 @@ export function usePaystack() {
     const handler = window.PaystackPop.setup({
       key: PAYSTACK_PUBLIC_KEY,
       email: user.email,
-      amount: 4500 * 100, // ₦4,500 in kobo
-      currency: "NGN",
+      amount: pricing.amount,
+      currency: pricing.currency,
       ref: `santra_${user.id}_${Date.now()}`,
       callback: async (response: { reference: string }) => {
         try {
@@ -74,7 +76,7 @@ export function usePaystack() {
     });
 
     handler.openIframe();
-  }, [user, verifyPayment, refetch]);
+  }, [user, verifyPayment, refetch, pricing]);
 
-  return { initiatePayment };
+  return { initiatePayment, pricing };
 }

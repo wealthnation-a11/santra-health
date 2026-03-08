@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { usePaystack } from "@/hooks/usePaystack";
+import { usePricing } from "@/hooks/usePricing";
 
 const features = [
   { label: "Daily messages", free: "15 per day", premium: "Unlimited", icon: MessageSquare },
@@ -24,6 +25,7 @@ export default function Pricing() {
   const { user } = useAuth();
   const { isPremium, isLoading } = useSubscription();
   const { initiatePayment } = usePaystack();
+  const pricing = usePricing();
 
   const handleUpgrade = () => {
     if (!user) {
@@ -117,7 +119,7 @@ export default function Pricing() {
               <p className="text-muted-foreground text-sm">Full access, no limits</p>
             </div>
             <div className="mb-6">
-              <span className="text-4xl font-bold text-foreground">₦4,500</span>
+              <span className="text-4xl font-bold text-foreground">{pricing.symbol}{pricing.amount / 100}</span>
               <span className="text-muted-foreground">/month</span>
             </div>
             <ul className="space-y-3 mb-8 flex-1">
@@ -138,7 +140,7 @@ export default function Pricing() {
             ) : (
               <Button variant="santra" size="lg" onClick={handleUpgrade} disabled={isLoading}>
                 <Sparkles size={16} className="mr-1" />
-                Upgrade Now — ₦4,500/mo
+                Upgrade Now — {pricing.displayPrice}
               </Button>
             )}
           </div>
@@ -151,7 +153,7 @@ export default function Pricing() {
           </h2>
           <div className="space-y-4">
             {[
-              { q: "How does billing work?", a: "You're charged ₦4,500 once per month via Paystack. You can pay with cards, bank transfers, or mobile money depending on your region." },
+              { q: "How does billing work?", a: `You're charged ${pricing.displayPrice} via Paystack. You can pay with cards, bank transfers, or mobile money depending on your region.` },
               { q: "Can I cancel anytime?", a: "Yes! You can cancel your subscription at any time from your Settings page. You'll retain premium access until your billing period ends." },
               { q: "What payment methods are accepted?", a: "We accept Visa, Mastercard, Verve, bank transfers, and mobile money through Paystack — Africa's leading payment platform." },
               { q: "Is my payment information secure?", a: "Absolutely. All payments are processed securely through Paystack. We never store your card details." },

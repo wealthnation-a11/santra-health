@@ -16,6 +16,7 @@ import { useConversations } from "@/hooks/useConversations";
 import { useAuth } from "@/hooks/useAuth";
 import { useMessageUsage } from "@/hooks/useMessageUsage";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { useRealtimeMessages } from "@/hooks/useRealtimeMessages";
 import { findLastIndex } from "@/lib/arrayUtils";
 import { toast } from "sonner";
 
@@ -47,7 +48,14 @@ export default function Chat() {
     deleteMessage,
     deleteMessagesAfter,
     loading,
+    refetch,
   } = useConversations();
+
+  useRealtimeMessages({
+    userId: user?.id,
+    activeConversationId,
+    onNewMessage: refetch,
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

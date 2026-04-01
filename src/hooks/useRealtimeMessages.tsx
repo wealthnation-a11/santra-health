@@ -59,6 +59,7 @@ export function useRealtimeMessages({
             newMsg.conversation_id !== activeConversationId
           ) {
             const preview = newMsg.content.slice(0, 80) + (newMsg.content.length > 80 ? "…" : "");
+            playNotificationSound();
             toast("New response received", {
               description: preview,
               duration: 5000,

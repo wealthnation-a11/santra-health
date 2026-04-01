@@ -2,6 +2,27 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
+/** Generates a concise conversation title from the user's first message */
+function summarizeTitle(content: string): string {
+  // Remove extra whitespace
+  const cleaned = content.replace(/\s+/g, " ").trim();
+  
+  // If short enough already, use as-is
+  if (cleaned.length <= 40) return cleaned;
+
+  // Try to extract a meaningful phrase: take the first sentence or clause
+  const sentenceEnd = cleaned.search(/[.?!]/);
+  if (sentenceEnd > 0 && sentenceEnd <= 50) {
+    return cleaned.slice(0, sentenceEnd + 1);
+  }
+
+  // Extract first few meaningful words (up to ~6 words)
+  const words = cleaned.split(" ");
+  const titleWords = words.slice(0, 6).join(" ");
+  
+  return titleWords + (words.length > 6 ? "…" : "");
+}
+
 export interface Message {
   id: string;
   content: string;
@@ -170,15 +191,16 @@ export function useConversations() {
       // Update conversation title if it's the first user message
       const conv = conversations.find((c) => c.id === conversationId);
       if (conv && conv.messages.length === 0 && role === "user") {
+        const summarizedTitle = summarizeTitle(content);
         await supabase
           .from("conversations")
-          .update({ title: content.slice(0, 30) + (content.length > 30 ? "..." : "") })
+          .update({ title: summarizedTitle })
           .eq("id", conversationId);
         
         setConversations((prev) =>
           prev.map((c) =>
             c.id === conversationId
-              ? { ...c, title: content.slice(0, 30) + (content.length > 30 ? "..." : "") }
+              ? { ...c, title: summarizedTitle }
               : c
           )
         );

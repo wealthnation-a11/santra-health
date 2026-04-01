@@ -2,6 +2,27 @@ import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
+/** Generates a concise conversation title from the user's first message */
+function summarizeTitle(content: string): string {
+  // Remove extra whitespace
+  const cleaned = content.replace(/\s+/g, " ").trim();
+  
+  // If short enough already, use as-is
+  if (cleaned.length <= 40) return cleaned;
+
+  // Try to extract a meaningful phrase: take the first sentence or clause
+  const sentenceEnd = cleaned.search(/[.?!]/);
+  if (sentenceEnd > 0 && sentenceEnd <= 50) {
+    return cleaned.slice(0, sentenceEnd + 1);
+  }
+
+  // Extract first few meaningful words (up to ~6 words)
+  const words = cleaned.split(" ");
+  const titleWords = words.slice(0, 6).join(" ");
+  
+  return titleWords + (words.length > 6 ? "…" : "");
+}
+
 export interface Message {
   id: string;
   content: string;

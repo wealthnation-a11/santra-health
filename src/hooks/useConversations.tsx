@@ -170,15 +170,16 @@ export function useConversations() {
       // Update conversation title if it's the first user message
       const conv = conversations.find((c) => c.id === conversationId);
       if (conv && conv.messages.length === 0 && role === "user") {
+        const summarizedTitle = summarizeTitle(content);
         await supabase
           .from("conversations")
-          .update({ title: content.slice(0, 30) + (content.length > 30 ? "..." : "") })
+          .update({ title: summarizedTitle })
           .eq("id", conversationId);
         
         setConversations((prev) =>
           prev.map((c) =>
             c.id === conversationId
-              ? { ...c, title: content.slice(0, 30) + (content.length > 30 ? "..." : "") }
+              ? { ...c, title: summarizedTitle }
               : c
           )
         );

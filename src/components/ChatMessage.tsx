@@ -23,11 +23,15 @@ interface ChatMessageProps {
   isLastUser?: boolean;
   onRegenerate?: () => void;
   onEdit?: (newContent: string) => void;
+  onBranch?: () => void;
+  onPin?: () => void;
+  isPinned?: boolean;
   feedback?: "positive" | "negative" | null;
   onFeedbackChange?: (feedback: "positive" | "negative" | null) => void;
   onSuggestionSelect?: (suggestion: string) => void;
   showSuggestions?: boolean;
   conversationId?: string;
+  branchInfo?: { currentIndex: number; totalBranches: number; onNavigate: (dir: "prev" | "next") => void };
 }
 
 export function ChatMessage({

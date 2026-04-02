@@ -6,6 +6,7 @@ import { MessageActions } from "./MessageActions";
 import { EditMessageInput } from "./EditMessageInput";
 import { SuggestionChips, parseSuggestions } from "./SuggestionChips";
 import ReactMarkdown from "react-markdown";
+import { RichMarkdown } from "./RichMarkdown";
 
 export interface Message {
   id: string;

@@ -42,11 +42,15 @@ export function ChatMessage({
   isLastUser = false,
   onRegenerate,
   onEdit,
+  onBranch,
+  onPin,
+  isPinned = false,
   feedback,
   onFeedbackChange,
   onSuggestionSelect,
   showSuggestions = false,
   conversationId,
+  branchInfo,
 }: ChatMessageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const isUser = message.role === "user";

@@ -543,68 +543,6 @@ export default function Chat() {
           </div>
         </header>
 
-  // Load pinned message IDs for current conversation
-  useEffect(() => {
-    if (!user || !activeConversationId) {
-      setPinnedIds(new Set());
-      return;
-    }
-    (async () => {
-      const { data } = await supabase
-        .from("pinned_messages")
-        .select("message_id")
-        .eq("user_id", user.id)
-        .eq("conversation_id", activeConversationId);
-      setPinnedIds(new Set((data || []).map((p: { message_id: string }) => p.message_id)));
-    })();
-  }, [user, activeConversationId, pinRefreshKey]);
-
-  const handlePinMessage = async (messageId: string) => {
-    if (!user || !activeConversationId) return;
-    if (pinnedIds.has(messageId)) {
-      await supabase.from("pinned_messages").delete().eq("user_id", user.id).eq("message_id", messageId);
-      setPinnedIds((prev) => { const next = new Set(prev); next.delete(messageId); return next; });
-      setPinRefreshKey((k) => k + 1);
-      toast.success("Message unpinned");
-    } else {
-      await supabase.from("pinned_messages").insert({
-        user_id: user.id,
-        message_id: messageId,
-        conversation_id: activeConversationId,
-      });
-      setPinnedIds((prev) => new Set(prev).add(messageId));
-      setPinRefreshKey((k) => k + 1);
-      toast.success("Message pinned");
-    }
-  };
-
-  const handleBranchFromMessage = async (messageId: string) => {
-    if (!activeConversation || !activeConversationId) return;
-    // Find the message and all messages up to (and including) it
-    const msgIndex = activeConversation.messages.findIndex((m) => m.id === messageId);
-    if (msgIndex === -1) return;
-
-    const historyUpToMsg = activeConversation.messages.slice(0, msgIndex + 1);
-    
-    // Create a new conversation with branched history
-    const branchTitle = `Branch: ${activeConversation.title}`;
-    const newConvId = await createConversation(branchTitle);
-    if (!newConvId) return;
-
-    // Copy messages to new conversation
-    for (const msg of historyUpToMsg) {
-      await supabase.from("messages").insert({
-        conversation_id: newConvId,
-        content: msg.content,
-        role: msg.role,
-        is_emergency: msg.isEmergency || false,
-      });
-    }
-
-    await refetch();
-    setActiveConversationId(newConvId);
-    toast.success("Conversation branched! Continue from here.");
-  };
 
 
         <div className="flex-1 overflow-y-auto scrollbar-thin">

@@ -10,18 +10,15 @@ interface SuggestionChipsProps {
 export function parseSuggestions(content: string): { cleanContent: string; suggestions: string[] } {
   const suggestionMatch = content.match(/\[SUGGESTIONS\]:\s*(.+?)$/m);
   
-  if (!suggestionMatch) {
-    return { cleanContent: content, suggestions: [] };
-  }
+  const suggestions = suggestionMatch
+    ? suggestionMatch[1].split("|").map((s) => s.trim()).filter((s) => s.length > 0).slice(0, 3)
+    : [];
   
-  const suggestionsLine = suggestionMatch[1];
-  const suggestions = suggestionsLine
-    .split("|")
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0)
-    .slice(0, 3); // Max 3 suggestions
-  
-  const cleanContent = content.replace(/\n?\[SUGGESTIONS\]:\s*(.+?)$/m, "").trim();
+  // Strip both [SUGGESTIONS] and [MEMORY] lines from displayed content
+  const cleanContent = content
+    .replace(/\n?\[SUGGESTIONS\]:\s*(.+?)$/m, "")
+    .replace(/\n?\[MEMORY\]:\s*(.+?)$/m, "")
+    .trim();
   
   return { cleanContent, suggestions };
 }

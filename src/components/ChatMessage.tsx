@@ -97,9 +97,7 @@ export function ChatMessage({
           {isUser ? (
             <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{cleanContent}</p>
           ) : (
-            <div className="text-[15px] leading-relaxed prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0.5 prose-headings:my-3 prose-headings:font-semibold prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-strong:text-foreground prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:before:content-none prose-code:after:content-none">
-              <ReactMarkdown>{cleanContent}</ReactMarkdown>
-            </div>
+            <RichMarkdown content={cleanContent} />
           )}
         </div>
         

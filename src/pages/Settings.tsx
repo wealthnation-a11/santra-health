@@ -205,6 +205,9 @@ export default function Settings() {
         {/* Health Profile Section */}
         <HealthProfileCard />
 
+        {/* AI Memory Section */}
+        <MemoryCard />
+
         {/* Integrations Section */}
         <IntegrationsCard />
 

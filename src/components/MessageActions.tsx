@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy, Check, RefreshCw, ThumbsUp, ThumbsDown, Pencil, Share2, Download, MessageCircle, Mail, FileText, FileDown, Bookmark } from "lucide-react";
+import { Copy, Check, RefreshCw, ThumbsUp, ThumbsDown, Pencil, Share2, Download, MessageCircle, Mail, FileText, FileDown, Bookmark, Pin, GitBranch } from "lucide-react";
 import { Button } from "./ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import {

@@ -32,6 +32,8 @@ export default function Chat() {
   const [streamingContent, setStreamingContent] = useState("");
   const [showLocationPrompt, setShowLocationPrompt] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
+  const [pinnedIds, setPinnedIds] = useState<Set<string>>(new Set());
+  const [pinRefreshKey, setPinRefreshKey] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy, Check, RefreshCw, ThumbsUp, ThumbsDown, Pencil, Share2, Download, MessageCircle, Mail, FileText, FileDown, Bookmark } from "lucide-react";
+import { Copy, Check, RefreshCw, ThumbsUp, ThumbsDown, Pencil, Share2, Download, MessageCircle, Mail, FileText, FileDown, Bookmark, Pin, GitBranch } from "lucide-react";
 import { Button } from "./ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 import {
@@ -23,6 +23,9 @@ interface MessageActionsProps {
   isLastUser?: boolean;
   onRegenerate?: () => void;
   onEdit?: () => void;
+  onBranch?: () => void;
+  onPin?: () => void;
+  isPinned?: boolean;
   feedback?: "positive" | "negative" | null;
   onFeedbackChange?: (feedback: "positive" | "negative" | null) => void;
   conversationId?: string;
@@ -36,6 +39,9 @@ export function MessageActions({
   isLastUser = false,
   onRegenerate,
   onEdit,
+  onBranch,
+  onPin,
+  isPinned = false,
   feedback: initialFeedback,
   onFeedbackChange,
   conversationId,
@@ -298,6 +304,48 @@ export function MessageActions({
                 <p>Bad response</p>
               </TooltipContent>
             </Tooltip>
+
+            {/* Pin button */}
+            {onPin && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={`h-7 w-7 ${
+                      isPinned
+                        ? "text-primary bg-primary/10"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                    onClick={onPin}
+                  >
+                    <Pin size={14} fill={isPinned ? "currentColor" : "none"} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>{isPinned ? "Unpin" : "Pin message"}</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+
+            {/* Branch button */}
+            {onBranch && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                    onClick={onBranch}
+                  >
+                    <GitBranch size={14} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>Branch from here</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
 
             {/* Bookmark button */}
             <Tooltip>

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Menu, X } from "lucide-react";
+import { PinnedMessagesPanel } from "@/components/PinnedMessagesPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { ChatSidebar } from "@/components/ChatSidebar";
@@ -31,6 +32,8 @@ export default function Chat() {
   const [streamingContent, setStreamingContent] = useState("");
   const [showLocationPrompt, setShowLocationPrompt] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
+  const [pinnedIds, setPinnedIds] = useState<Set<string>>(new Set());
+  const [pinRefreshKey, setPinRefreshKey] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   
@@ -94,6 +97,65 @@ export default function Chat() {
     onToggleSidebar: () => setSidebarOpen((prev) => !prev),
     onStopGeneration: isTyping ? handleStopGeneration : undefined,
   });
+
+  // Load pinned message IDs for current conversation
+  useEffect(() => {
+    if (!user || !activeConversationId) {
+      setPinnedIds(new Set());
+      return;
+    }
+    (async () => {
+      const { data } = await supabase
+        .from("pinned_messages")
+        .select("message_id")
+        .eq("user_id", user.id)
+        .eq("conversation_id", activeConversationId);
+      setPinnedIds(new Set((data || []).map((p: { message_id: string }) => p.message_id)));
+    })();
+  }, [user, activeConversationId, pinRefreshKey]);
+
+  const handlePinMessage = async (messageId: string) => {
+    if (!user || !activeConversationId) return;
+    if (pinnedIds.has(messageId)) {
+      await supabase.from("pinned_messages").delete().eq("user_id", user.id).eq("message_id", messageId);
+      setPinnedIds((prev) => { const next = new Set(prev); next.delete(messageId); return next; });
+      setPinRefreshKey((k) => k + 1);
+      toast.success("Message unpinned");
+    } else {
+      await supabase.from("pinned_messages").insert({
+        user_id: user.id,
+        message_id: messageId,
+        conversation_id: activeConversationId,
+      });
+      setPinnedIds((prev) => new Set(prev).add(messageId));
+      setPinRefreshKey((k) => k + 1);
+      toast.success("Message pinned");
+    }
+  };
+
+  const handleBranchFromMessage = async (messageId: string) => {
+    if (!activeConversation || !activeConversationId) return;
+    const msgIndex = activeConversation.messages.findIndex((m) => m.id === messageId);
+    if (msgIndex === -1) return;
+
+    const historyUpToMsg = activeConversation.messages.slice(0, msgIndex + 1);
+    const branchTitle = `Branch: ${activeConversation.title}`;
+    const newConvId = await createConversation(branchTitle);
+    if (!newConvId) return;
+
+    for (const msg of historyUpToMsg) {
+      await supabase.from("messages").insert({
+        conversation_id: newConvId,
+        content: msg.content,
+        role: msg.role,
+        is_emergency: msg.isEmergency || false,
+      });
+    }
+
+    await refetch();
+    setActiveConversationId(newConvId);
+    toast.success("Conversation branched! Continue from here.");
+  };
 
   const streamChat = useCallback(async (
     messages: { role: string; content: string }[],
@@ -540,6 +602,14 @@ export default function Chat() {
           </div>
         </header>
 
+        {/* Pinned Messages Panel */}
+        {activeConversationId && (
+          <PinnedMessagesPanel
+            key={pinRefreshKey}
+            conversationId={activeConversationId}
+          />
+        )}
+
 
         <div className="flex-1 overflow-y-auto scrollbar-thin">
           {!activeConversation || activeConversation.messages.length === 0 ? (
@@ -588,6 +658,9 @@ export default function Chat() {
                   isLastUser={message.role === "user" && index === lastUserIdx}
                   onRegenerate={handleRegenerate}
                   onEdit={(newContent) => handleEditMessage(message.id, newContent)}
+                  onBranch={() => handleBranchFromMessage(message.id)}
+                  onPin={() => handlePinMessage(message.id)}
+                  isPinned={pinnedIds.has(message.id)}
                   onSuggestionSelect={handleSendMessage}
                   showSuggestions={message.role === "assistant" && index === lastAssistantIdx && !isTyping}
                   conversationId={activeConversationId || undefined}

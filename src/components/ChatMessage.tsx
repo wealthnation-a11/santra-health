@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { BranchSelector } from "./BranchSelector";
 import { User } from "lucide-react";
 import { SantraLogo } from "./SantraLogo";
 import { ConsultDoctorButton } from "./ConsultDoctorButton";
@@ -23,11 +24,15 @@ interface ChatMessageProps {
   isLastUser?: boolean;
   onRegenerate?: () => void;
   onEdit?: (newContent: string) => void;
+  onBranch?: () => void;
+  onPin?: () => void;
+  isPinned?: boolean;
   feedback?: "positive" | "negative" | null;
   onFeedbackChange?: (feedback: "positive" | "negative" | null) => void;
   onSuggestionSelect?: (suggestion: string) => void;
   showSuggestions?: boolean;
   conversationId?: string;
+  branchInfo?: { currentIndex: number; totalBranches: number; onNavigate: (dir: "prev" | "next") => void };
 }
 
 export function ChatMessage({
@@ -37,11 +42,15 @@ export function ChatMessage({
   isLastUser = false,
   onRegenerate,
   onEdit,
+  onBranch,
+  onPin,
+  isPinned = false,
   feedback,
   onFeedbackChange,
   onSuggestionSelect,
   showSuggestions = false,
   conversationId,
+  branchInfo,
 }: ChatMessageProps) {
   const [isEditing, setIsEditing] = useState(false);
   const isUser = message.role === "user";
@@ -106,6 +115,15 @@ export function ChatMessage({
             {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
           </span>
           
+          {/* Branch Selector */}
+          {branchInfo && branchInfo.totalBranches > 1 && (
+            <BranchSelector
+              currentIndex={branchInfo.currentIndex}
+              totalBranches={branchInfo.totalBranches}
+              onNavigate={branchInfo.onNavigate}
+            />
+          )}
+          
           {/* Message Actions */}
           {message.id !== "streaming" && (
             <MessageActions
@@ -116,6 +134,9 @@ export function ChatMessage({
               isLastUser={isLastUser}
               onRegenerate={onRegenerate}
               onEdit={isUser && isLastUser ? () => setIsEditing(true) : undefined}
+              onBranch={isAI ? onBranch : undefined}
+              onPin={isAI ? onPin : undefined}
+              isPinned={isPinned}
               feedback={feedback}
               onFeedbackChange={onFeedbackChange}
               conversationId={conversationId}

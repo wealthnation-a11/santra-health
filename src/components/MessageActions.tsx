@@ -305,6 +305,48 @@ export function MessageActions({
               </TooltipContent>
             </Tooltip>
 
+            {/* Pin button */}
+            {onPin && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={`h-7 w-7 ${
+                      isPinned
+                        ? "text-primary bg-primary/10"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                    onClick={onPin}
+                  >
+                    <Pin size={14} fill={isPinned ? "currentColor" : "none"} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>{isPinned ? "Unpin" : "Pin message"}</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+
+            {/* Branch button */}
+            {onBranch && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                    onClick={onBranch}
+                  >
+                    <GitBranch size={14} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">
+                  <p>Branch from here</p>
+                </TooltipContent>
+              </Tooltip>
+            )}
+
             {/* Bookmark button */}
             <Tooltip>
               <TooltipTrigger asChild>

@@ -23,6 +23,9 @@ interface MessageActionsProps {
   isLastUser?: boolean;
   onRegenerate?: () => void;
   onEdit?: () => void;
+  onBranch?: () => void;
+  onPin?: () => void;
+  isPinned?: boolean;
   feedback?: "positive" | "negative" | null;
   onFeedbackChange?: (feedback: "positive" | "negative" | null) => void;
   conversationId?: string;

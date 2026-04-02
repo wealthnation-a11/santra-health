@@ -9,6 +9,7 @@ import { SantraLogo } from "@/components/SantraLogo";
 import { VoiceUsageCard } from "@/components/settings/VoiceUsageCard";
 import { HealthProfileCard } from "@/components/settings/HealthProfileCard";
 import { IntegrationsCard } from "@/components/settings/IntegrationsCard";
+import { MemoryCard } from "@/components/settings/MemoryCard";
 import { SubscriptionCard } from "@/components/settings/SubscriptionCard";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -203,6 +204,9 @@ export default function Settings() {
 
         {/* Health Profile Section */}
         <HealthProfileCard />
+
+        {/* AI Memory Section */}
+        <MemoryCard />
 
         {/* Integrations Section */}
         <IntegrationsCard />

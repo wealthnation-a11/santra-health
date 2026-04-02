@@ -23,7 +23,18 @@ For emergencies (chest pain, difficulty breathing, severe bleeding, stroke sympt
 
 Keep responses concise but thorough. Use simple, accessible language. Show empathy and understanding.
 
-IMPORTANT: At the end of EVERY response, on a new line, add 2-3 helpful follow-up questions the user might want to ask next. Format them exactly like this:
+When appropriate, use rich formatting:
+- Use markdown tables for comparisons or structured data
+- Use bullet checklists for action items
+- Use **bold** for key terms and important warnings
+- Use collapsible sections with <details><summary>Title</summary>Content</details> for supplementary info like sources or detailed explanations
+
+MEMORY EXTRACTION: After generating your response, analyze the conversation for important health facts worth remembering about this user. If you identify any, add them at the very end of your response on a new line in this exact format:
+[MEMORY]: fact1 | fact2 | fact3
+Categories of facts to remember: symptoms they experience regularly, medications they take, conditions they have, lifestyle habits, health goals, allergies, family health history.
+Only extract genuinely important, specific health facts. Do NOT extract generic conversation topics. If nothing is worth remembering, do not include the [MEMORY] line.
+
+IMPORTANT: At the end of EVERY response (before any [MEMORY] line), on a new line, add 2-3 helpful follow-up questions the user might want to ask next. Format them exactly like this:
 [SUGGESTIONS]: Question 1? | Question 2? | Question 3?
 
 Make the suggestions contextually relevant to what you just discussed. Keep each suggestion concise (under 8 words).`;
@@ -41,15 +52,16 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const sb = createClient(supabaseUrl, supabaseKey);
+
     // Build personalized system prompt with health profile context
     let systemPrompt = BASE_SYSTEM_PROMPT;
 
     if (userId) {
       try {
-        const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-        const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-        const sb = createClient(supabaseUrl, supabaseKey);
-
+        // Fetch health profile
         const { data: healthProfile } = await sb
           .from("health_profiles")
           .select("*")
@@ -69,9 +81,21 @@ serve(async (req) => {
             systemPrompt += `\n\nIMPORTANT CONTEXT - The user has provided the following health profile. Factor this into your responses when relevant (e.g. drug interactions with their medications, allergy warnings, condition-specific advice):\n${parts.join("\n")}`;
           }
         }
+
+        // Fetch AI memories
+        const { data: memories } = await sb
+          .from("user_memory")
+          .select("memory_text, category")
+          .eq("user_id", userId)
+          .order("updated_at", { ascending: false })
+          .limit(20);
+
+        if (memories && memories.length > 0) {
+          const memoryLines = memories.map((m: { memory_text: string; category: string }) => `- [${m.category}] ${m.memory_text}`);
+          systemPrompt += `\n\nAI MEMORY - Things you remember about this user from previous conversations. Reference these naturally when relevant (e.g. "Last time you mentioned your migraines — how are those going?"). Do NOT list these back to the user unprompted:\n${memoryLines.join("\n")}`;
+        }
       } catch (e) {
-        console.error("Error fetching health profile:", e);
-        // Continue without health profile context
+        console.error("Error fetching user context:", e);
       }
     }
 
@@ -132,7 +156,88 @@ serve(async (req) => {
       );
     }
 
-    return new Response(response.body, {
+    // We need to intercept the stream to extract [MEMORY] tags and save them
+    // Create a TransformStream to process the SSE data
+    const { readable, writable } = new TransformStream();
+    const writer = writable.getWriter();
+    const reader = response.body!.getReader();
+    const decoder = new TextDecoder();
+    const encoder = new TextEncoder();
+
+    // Process stream in background
+    (async () => {
+      let fullContent = "";
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          const chunk = decoder.decode(value, { stream: true });
+          
+          // Pass through to client
+          await writer.write(encoder.encode(chunk));
+          
+          // Also accumulate content for memory extraction
+          for (const line of chunk.split("\n")) {
+            if (!line.startsWith("data: ")) continue;
+            const jsonStr = line.slice(6).trim();
+            if (jsonStr === "[DONE]") continue;
+            try {
+              const parsed = JSON.parse(jsonStr);
+              const content = parsed.choices?.[0]?.delta?.content;
+              if (content) fullContent += content;
+            } catch { /* ignore */ }
+          }
+        }
+      } catch (e) {
+        console.error("Stream processing error:", e);
+      } finally {
+        await writer.close();
+        
+        // Extract and save memories after stream completes
+        if (userId && fullContent) {
+          try {
+            const memoryMatch = fullContent.match(/\[MEMORY\]:\s*(.+)/);
+            if (memoryMatch) {
+              const memoryItems = memoryMatch[1].split("|").map((m: string) => m.trim()).filter(Boolean);
+              
+              for (const memoryText of memoryItems) {
+                // Determine category from content
+                let category = "general";
+                const lower = memoryText.toLowerCase();
+                if (lower.includes("allerg")) category = "allergy";
+                else if (lower.includes("medicat") || lower.includes("taking") || lower.includes("prescri")) category = "medication";
+                else if (lower.includes("symptom") || lower.includes("pain") || lower.includes("ache")) category = "symptom";
+                else if (lower.includes("condition") || lower.includes("diagnos")) category = "condition";
+                else if (lower.includes("goal") || lower.includes("want to") || lower.includes("trying to")) category = "goal";
+                else if (lower.includes("family") || lower.includes("mother") || lower.includes("father")) category = "family_history";
+                else if (lower.includes("exercise") || lower.includes("diet") || lower.includes("sleep") || lower.includes("smoke") || lower.includes("drink")) category = "lifestyle";
+
+                // Check for duplicate
+                const { data: existing } = await sb
+                  .from("user_memory")
+                  .select("id")
+                  .eq("user_id", userId)
+                  .eq("memory_text", memoryText)
+                  .maybeSingle();
+
+                if (!existing) {
+                  await sb.from("user_memory").insert({
+                    user_id: userId,
+                    memory_text: memoryText,
+                    category,
+                  });
+                }
+              }
+            }
+          } catch (e) {
+            console.error("Error saving memories:", e);
+          }
+        }
+      }
+    })();
+
+    return new Response(readable, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
   } catch (error) {

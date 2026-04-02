@@ -185,6 +185,7 @@ export type Database = {
           created_at: string
           id: string
           is_emergency: boolean
+          parent_message_id: string | null
           role: string
         }
         Insert: {
@@ -193,6 +194,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_emergency?: boolean
+          parent_message_id?: string | null
           role: string
         }
         Update: {
@@ -201,6 +203,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_emergency?: boolean
+          parent_message_id?: string | null
           role?: string
         }
         Relationships: [
@@ -209,6 +212,52 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_parent_message_id_fkey"
+            columns: ["parent_message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pinned_messages: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          id: string
+          message_id: string
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          id?: string
+          message_id: string
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pinned_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pinned_messages_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
             referencedColumns: ["id"]
           },
         ]

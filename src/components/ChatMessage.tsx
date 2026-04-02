@@ -115,6 +115,15 @@ export function ChatMessage({
             {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
           </span>
           
+          {/* Branch Selector */}
+          {branchInfo && branchInfo.totalBranches > 1 && (
+            <BranchSelector
+              currentIndex={branchInfo.currentIndex}
+              totalBranches={branchInfo.totalBranches}
+              onNavigate={branchInfo.onNavigate}
+            />
+          )}
+          
           {/* Message Actions */}
           {message.id !== "streaming" && (
             <MessageActions
@@ -125,6 +134,9 @@ export function ChatMessage({
               isLastUser={isLastUser}
               onRegenerate={onRegenerate}
               onEdit={isUser && isLastUser ? () => setIsEditing(true) : undefined}
+              onBranch={isAI ? onBranch : undefined}
+              onPin={isAI ? onPin : undefined}
+              isPinned={isPinned}
               feedback={feedback}
               onFeedbackChange={onFeedbackChange}
               conversationId={conversationId}

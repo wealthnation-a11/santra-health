@@ -245,6 +245,18 @@ export default function Auth() {
                   </div>
                 </div>
 
+                {mode === "signin" && (
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => navigate("/reset-password")}
+                      className="text-sm text-primary hover:underline font-medium"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
+                )}
+
                 {mode === "signup" && (
                   <div className="space-y-2">
                     <Label htmlFor="confirmPassword">Confirm Password</Label>

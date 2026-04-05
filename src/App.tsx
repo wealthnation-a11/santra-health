@@ -21,6 +21,7 @@ import FirstAid from "./pages/FirstAid";
 import Tools from "./pages/Tools";
 import Pricing from "./pages/Pricing";
 import EduPricing from "./pages/EduPricing";
+import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -114,6 +115,7 @@ const App = () => (
                 }
               />
               <Route path="/pricing" element={<Pricing />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/pricing/education" element={<EduPricing />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />

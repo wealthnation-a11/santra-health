@@ -685,8 +685,7 @@ export default function Chat() {
           )}
         </div>
 
-        {/* Emergency Banner */}
-        {showEmergency && <EmergencyBanner onConsultDoctor={handleConsultDoctor} />}
+        {/* Removed large emergency banner — "Consult a Doctor" button in header is sufficient */}
 
         {/* Input Area */}
         <div className="border-t border-border p-4 bg-background">

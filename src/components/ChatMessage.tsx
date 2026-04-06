@@ -88,79 +88,94 @@ export function ChatMessage({
   }
 
   return (
-    <div className={`flex gap-3 animate-fade-in group ${isUser ? "justify-end" : "justify-start"}`}>
-      {!isUser && (
-        <div className="flex-shrink-0 mt-1">
-          <SantraLogo size="sm" showText={false} />
+    <div className={`animate-fade-in group ${isUser ? "flex justify-end" : ""}`}>
+      {/* AI messages: Claude-like full-width layout */}
+      {isAI && (
+        <div className="w-full">
+          <div className="flex items-start gap-2.5 mb-1">
+            <div className="flex-shrink-0 mt-0.5">
+              <SantraLogo size="sm" showText={false} />
+            </div>
+            <span className="text-sm font-semibold text-foreground">Santra</span>
+          </div>
+          <div className="pl-0 md:pl-[34px]">
+            <div className="py-1">
+              <RichMarkdown content={cleanContent} />
+            </div>
+            
+            <div className="flex items-center gap-2 mt-2 flex-wrap">
+              <span className="text-xs text-muted-foreground">
+                {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              </span>
+              
+              {branchInfo && branchInfo.totalBranches > 1 && (
+                <BranchSelector
+                  currentIndex={branchInfo.currentIndex}
+                  totalBranches={branchInfo.totalBranches}
+                  onNavigate={branchInfo.onNavigate}
+                />
+              )}
+              
+              {message.id !== "streaming" && (
+                <MessageActions
+                  messageId={message.id}
+                  content={cleanContent}
+                  role={message.role}
+                  isLastAssistant={isLastAssistant}
+                  isLastUser={isLastUser}
+                  onRegenerate={onRegenerate}
+                  onEdit={undefined}
+                  onBranch={onBranch}
+                  onPin={onPin}
+                  isPinned={isPinned}
+                  feedback={feedback}
+                  onFeedbackChange={onFeedbackChange}
+                  conversationId={conversationId}
+                />
+              )}
+              
+              {showConsultButton && (
+                <ConsultDoctorButton className="text-xs h-7 px-3" />
+              )}
+            </div>
+            
+            {showSuggestions && suggestions.length > 0 && onSuggestionSelect && (
+              <SuggestionChips 
+                suggestions={suggestions} 
+                onSelect={onSuggestionSelect} 
+              />
+            )}
+          </div>
         </div>
       )}
-      
-      <div className={`max-w-[80%] md:max-w-[70%] ${isUser ? "order-first" : ""}`}>
-        <div
-          className={`px-4 py-3 ${
-            isUser
-              ? "bg-santra-chat-user rounded-2xl rounded-br-md text-foreground"
-              : "bg-santra-chat-ai rounded-2xl rounded-bl-md text-foreground"
-          }`}
-        >
-          {isUser ? (
-            <p className="text-[15px] leading-relaxed whitespace-pre-wrap">{cleanContent}</p>
-          ) : (
-            <RichMarkdown content={cleanContent} />
-          )}
-        </div>
-        
-        <div className={`flex items-center gap-2 mt-2 ${isUser ? "justify-end" : "justify-start"}`}>
-          <span className="text-xs text-muted-foreground">
-            {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-          </span>
-          
-          {/* Branch Selector */}
-          {branchInfo && branchInfo.totalBranches > 1 && (
-            <BranchSelector
-              currentIndex={branchInfo.currentIndex}
-              totalBranches={branchInfo.totalBranches}
-              onNavigate={branchInfo.onNavigate}
-            />
-          )}
-          
-          {/* Message Actions */}
-          {message.id !== "streaming" && (
-            <MessageActions
-              messageId={message.id}
-              content={cleanContent}
-              role={message.role}
-              isLastAssistant={isLastAssistant}
-              isLastUser={isLastUser}
-              onRegenerate={onRegenerate}
-              onEdit={isUser && isLastUser ? () => setIsEditing(true) : undefined}
-              onBranch={isAI ? onBranch : undefined}
-              onPin={isAI ? onPin : undefined}
-              isPinned={isPinned}
-              feedback={feedback}
-              onFeedbackChange={onFeedbackChange}
-              conversationId={conversationId}
-            />
-          )}
-          
-          {isAI && showConsultButton && (
-            <ConsultDoctorButton className="text-xs h-7 px-3" />
-          )}
-        </div>
-        
-        {/* Suggestion Chips - only show on last assistant message when not streaming */}
-        {isAI && showSuggestions && suggestions.length > 0 && onSuggestionSelect && (
-          <SuggestionChips 
-            suggestions={suggestions} 
-            onSelect={onSuggestionSelect} 
-          />
-        )}
-      </div>
 
+      {/* User messages: right-aligned bubble */}
       {isUser && (
-        <div className="flex-shrink-0 mt-1">
-          <div className="w-8 h-8 bg-secondary rounded-full flex items-center justify-center">
-            <User size={16} className="text-muted-foreground" />
+        <div className="max-w-[85%] md:max-w-[70%] inline-block">
+          <div className="bg-santra-chat-user rounded-2xl rounded-br-md px-4 py-3 text-foreground">
+            <p className="text-[15px] leading-relaxed whitespace-pre-wrap break-words">{cleanContent}</p>
+          </div>
+          <div className="flex items-center gap-2 mt-1.5 justify-end">
+            <span className="text-xs text-muted-foreground">
+              {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            </span>
+            {message.id !== "streaming" && (
+              <MessageActions
+                messageId={message.id}
+                content={cleanContent}
+                role={message.role}
+                isLastAssistant={false}
+                isLastUser={isLastUser}
+                onRegenerate={undefined}
+                onEdit={isLastUser ? () => setIsEditing(true) : undefined}
+                onBranch={undefined}
+                onPin={undefined}
+                isPinned={false}
+                feedback={undefined}
+                onFeedbackChange={undefined}
+                conversationId={conversationId}
+              />
+            )}
           </div>
         </div>
       )}

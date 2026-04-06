@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { BranchSelector } from "./BranchSelector";
-import { User } from "lucide-react";
+import { User, Sparkles } from "lucide-react";
+import { Badge } from "./ui/badge";
 import { SantraLogo } from "./SantraLogo";
 import { ConsultDoctorButton } from "./ConsultDoctorButton";
 import { MessageActions } from "./MessageActions";

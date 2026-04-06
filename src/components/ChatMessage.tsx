@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { BranchSelector } from "./BranchSelector";
-import { User } from "lucide-react";
+import { User, Sparkles } from "lucide-react";
+import { Badge } from "./ui/badge";
 import { SantraLogo } from "./SantraLogo";
 import { ConsultDoctorButton } from "./ConsultDoctorButton";
 import { MessageActions } from "./MessageActions";
@@ -97,6 +98,10 @@ export function ChatMessage({
               <SantraLogo size="sm" showText={false} />
             </div>
             <span className="text-sm font-semibold text-foreground">Santra</span>
+            <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 gap-0.5 font-medium text-muted-foreground">
+              <Sparkles size={10} className="text-primary" />
+              Advanced AI
+            </Badge>
           </div>
           <div className="pl-0 md:pl-[34px]">
             <div className="py-1">

@@ -21,6 +21,7 @@ export default function EduPricing() {
   const { eduPlan } = useEduSubscription();
   const { initiatePayment } = usePaystack();
   const [interval, setInterval] = useState<BillingInterval>("monthly");
+  const [waitlistOpen, setWaitlistOpen] = useState(false);
 
   const pricing = getEduPricingForCountry(profile?.country);
   const starterTier = pricing.starter[interval];

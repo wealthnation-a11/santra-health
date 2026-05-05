@@ -169,6 +169,7 @@ export default function EduPricing() {
           </p>
         </div>
       </main>
+      <EduProWaitlistModal open={waitlistOpen} onOpenChange={setWaitlistOpen} />
     </div>
   );
 }

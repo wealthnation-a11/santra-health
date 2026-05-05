@@ -23,6 +23,7 @@ import Pricing from "./pages/Pricing";
 import EduPricing from "./pages/EduPricing";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 

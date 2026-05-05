@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { SantraLogo } from "@/components/SantraLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { useEduSubscription } from "@/hooks/useEduSubscription";
 import { usePaystack } from "@/hooks/usePaystack";
 import { getEduPricingForCountry } from "@/data/eduPricing";

@@ -156,10 +156,9 @@ export default function EduPricing() {
             </ul>
             <Button
               className="w-full"
-              disabled
-              onClick={() => toast({ title: "Coming Soon", description: "The Pro plan will be available soon. Stay tuned!" })}
+              onClick={() => setWaitlistOpen(true)}
             >
-              Coming Soon
+              Join Pro Waitlist
             </Button>
           </div>
         </div>

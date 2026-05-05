@@ -8,6 +8,7 @@ import { SantraLogo } from "@/components/SantraLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { EduProWaitlistModal } from "@/components/EduProWaitlistModal";
 import { useEduSubscription } from "@/hooks/useEduSubscription";
 import { usePaystack } from "@/hooks/usePaystack";
 import { getEduPricingForCountry } from "@/data/eduPricing";
@@ -20,6 +21,7 @@ export default function EduPricing() {
   const { eduPlan } = useEduSubscription();
   const { initiatePayment } = usePaystack();
   const [interval, setInterval] = useState<BillingInterval>("monthly");
+  const [waitlistOpen, setWaitlistOpen] = useState(false);
 
   const pricing = getEduPricingForCountry(profile?.country);
   const starterTier = pricing.starter[interval];
@@ -154,10 +156,9 @@ export default function EduPricing() {
             </ul>
             <Button
               className="w-full"
-              disabled
-              onClick={() => toast({ title: "Coming Soon", description: "The Pro plan will be available soon. Stay tuned!" })}
+              onClick={() => setWaitlistOpen(true)}
             >
-              Coming Soon
+              Join Pro Waitlist
             </Button>
           </div>
         </div>
@@ -168,6 +169,7 @@ export default function EduPricing() {
           </p>
         </div>
       </main>
+      <EduProWaitlistModal open={waitlistOpen} onOpenChange={setWaitlistOpen} />
     </div>
   );
 }

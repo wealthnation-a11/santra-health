@@ -14,6 +14,7 @@ import {
 import { SantraLogo } from "@/components/SantraLogo";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 type AuthMode = "signin" | "signup";
 
@@ -50,6 +51,13 @@ export default function Auth() {
   const handleNext = () => {
     if (!email || !password) return;
     if (!isValidEmail(email)) {
+      const value = email.trim().toLowerCase();
+      const domain = value.includes("@") ? value.split("@")[1] : "invalid";
+      // Fire-and-forget log of blocked attempt for admin review
+      void supabase.from("blocked_signups").insert({
+        email: value,
+        reason: `Disallowed email domain: ${domain}`,
+      });
       toast({ title: "Invalid email", description: "Please put in a correct email address (Gmail, Yahoo, Outlook, or a custom domain).", variant: "destructive" });
       return;
     }

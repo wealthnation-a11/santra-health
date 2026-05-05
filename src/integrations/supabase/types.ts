@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      blocked_signups: {
+        Row: {
+          attempted_at: string
+          email: string
+          id: string
+          reason: string
+        }
+        Insert: {
+          attempted_at?: string
+          email: string
+          id?: string
+          reason: string
+        }
+        Update: {
+          attempted_at?: string
+          email?: string
+          id?: string
+          reason?: string
+        }
+        Relationships: []
+      }
       bookmarks: {
         Row: {
           conversation_id: string
@@ -104,6 +125,30 @@ export type Database = {
           updated_at?: string
           usage_date?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      edu_pro_waitlist: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          notified: boolean
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          notified?: boolean
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          notified?: boolean
+          user_id?: string | null
         }
         Relationships: []
       }

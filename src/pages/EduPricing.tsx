@@ -152,10 +152,10 @@ export default function EduPricing() {
             </ul>
             <Button
               className="w-full"
-              disabled={eduPlan === "edu_pro"}
-              onClick={() => handleUpgrade("edu_pro")}
+              disabled
+              onClick={() => toast({ title: "Coming Soon", description: "The Pro plan will be available soon. Stay tuned!" })}
             >
-              {eduPlan === "edu_pro" ? "Current Plan" : "Get Pro"}
+              Coming Soon
             </Button>
           </div>
         </div>

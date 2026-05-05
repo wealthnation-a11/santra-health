@@ -34,8 +34,25 @@ export default function Auth() {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const isValidEmail = (value: string) => {
+    const v = value.trim().toLowerCase();
+    const basic = /^[^\s@]+@([^\s@.]+\.)+[^\s@]+$/;
+    if (!basic.test(v)) return false;
+    const domain = v.split("@")[1];
+    const allowedFree = ["gmail.com", "yahoo.com", "ymail.com", "outlook.com", "hotmail.com", "live.com", "msn.com"];
+    if (allowedFree.includes(domain)) return true;
+    // Allow custom domains (anything that's not a known disallowed free provider)
+    const disallowed = ["aol.com", "icloud.com", "proton.me", "protonmail.com", "mail.com", "gmx.com", "yandex.com", "zoho.com", "rediffmail.com", "inbox.com"];
+    if (disallowed.includes(domain)) return false;
+    return true;
+  };
+
   const handleNext = () => {
     if (!email || !password) return;
+    if (!isValidEmail(email)) {
+      toast({ title: "Invalid email", description: "Please put in a correct email address (Gmail, Yahoo, Outlook, or a custom domain).", variant: "destructive" });
+      return;
+    }
     if (password.length < 6) {
       toast({ title: "Password too short", description: "Password must be at least 6 characters.", variant: "destructive" });
       return;

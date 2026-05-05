@@ -16,6 +16,7 @@ import type { BillingInterval } from "@/data/pricing";
 export default function EduPricing() {
   const navigate = useNavigate();
   const { profile } = useAuth();
+  const { toast } = useToast();
   const { eduPlan } = useEduSubscription();
   const { initiatePayment } = usePaystack();
   const [interval, setInterval] = useState<BillingInterval>("monthly");

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { SantraLogo } from "@/components/SantraLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 import { useEduSubscription } from "@/hooks/useEduSubscription";
 import { usePaystack } from "@/hooks/usePaystack";
 import { getEduPricingForCountry } from "@/data/eduPricing";
@@ -15,6 +16,7 @@ import type { BillingInterval } from "@/data/pricing";
 export default function EduPricing() {
   const navigate = useNavigate();
   const { profile } = useAuth();
+  const { toast } = useToast();
   const { eduPlan } = useEduSubscription();
   const { initiatePayment } = usePaystack();
   const [interval, setInterval] = useState<BillingInterval>("monthly");
@@ -152,10 +154,10 @@ export default function EduPricing() {
             </ul>
             <Button
               className="w-full"
-              disabled={eduPlan === "edu_pro"}
-              onClick={() => handleUpgrade("edu_pro")}
+              disabled
+              onClick={() => toast({ title: "Coming Soon", description: "The Pro plan will be available soon. Stay tuned!" })}
             >
-              {eduPlan === "edu_pro" ? "Current Plan" : "Get Pro"}
+              Coming Soon
             </Button>
           </div>
         </div>

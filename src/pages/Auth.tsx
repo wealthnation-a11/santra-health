@@ -14,6 +14,7 @@ import {
 import { SantraLogo } from "@/components/SantraLogo";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 type AuthMode = "signin" | "signup";
 

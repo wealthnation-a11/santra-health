@@ -8,6 +8,7 @@ import { SantraLogo } from "@/components/SantraLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { EduProWaitlistModal } from "@/components/EduProWaitlistModal";
 import { useEduSubscription } from "@/hooks/useEduSubscription";
 import { usePaystack } from "@/hooks/usePaystack";
 import { getEduPricingForCountry } from "@/data/eduPricing";

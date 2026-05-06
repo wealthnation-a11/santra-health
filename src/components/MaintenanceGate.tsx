@@ -19,7 +19,7 @@ export function MaintenanceGate({ children }: { children: ReactNode }) {
         supabase.from("app_settings").select("value").eq("key", "maintenance_mode").maybeSingle(),
         supabase.auth.getUser(),
       ]);
-      if (m.data?.value) setSetting(m.data.value as MaintenanceSetting);
+      if (m.data?.value) setSetting(m.data.value as unknown as MaintenanceSetting);
       if (u.data.user) {
         const { data: r } = await supabase
           .from("user_roles")
@@ -38,7 +38,7 @@ export function MaintenanceGate({ children }: { children: ReactNode }) {
         "postgres_changes",
         { event: "*", schema: "public", table: "app_settings", filter: "key=eq.maintenance_mode" },
         (payload: any) => {
-          if (payload.new?.value) setSetting(payload.new.value as MaintenanceSetting);
+          if (payload.new?.value) setSetting(payload.new.value as unknown as MaintenanceSetting);
         }
       )
       .subscribe();

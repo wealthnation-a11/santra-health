@@ -19,7 +19,7 @@ export function AppSettingsBanner() {
         .select("value")
         .eq("key", "broadcast_banner")
         .maybeSingle();
-      if (data?.value) setBanner(data.value as BannerSetting);
+      if (data?.value) setBanner(data.value as unknown as BannerSetting);
     };
     load();
     const channel = supabase
@@ -29,7 +29,7 @@ export function AppSettingsBanner() {
         { event: "*", schema: "public", table: "app_settings", filter: "key=eq.broadcast_banner" },
         (payload: any) => {
           if (payload.new?.value) {
-            setBanner(payload.new.value as BannerSetting);
+            setBanner(payload.new.value as unknown as BannerSetting);
             setDismissed(false);
           }
         }

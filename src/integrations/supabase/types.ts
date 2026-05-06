@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          admin_id: string
+          created_at: string
+          details: Json | null
+          id: string
+          target_id: string | null
+        }
+        Insert: {
+          action: string
+          admin_id: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+        }
+        Update: {
+          action?: string
+          admin_id?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          target_id?: string | null
+        }
+        Relationships: []
+      }
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       blocked_signups: {
         Row: {
           attempted_at: string
@@ -309,6 +357,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          ban_reason: string | null
+          banned_at: string | null
           country: string | null
           created_at: string
           date_of_birth: string | null
@@ -323,6 +373,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ban_reason?: string | null
+          banned_at?: string | null
           country?: string | null
           created_at?: string
           date_of_birth?: string | null
@@ -337,6 +389,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ban_reason?: string | null
+          banned_at?: string | null
           country?: string | null
           created_at?: string
           date_of_birth?: string | null
@@ -492,9 +546,25 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_ban_user: {
+        Args: { _reason?: string; _user_id: string }
+        Returns: undefined
+      }
       admin_daily_messages: { Args: { _days?: number }; Returns: Json }
       admin_daily_signups: { Args: { _days?: number }; Returns: Json }
+      admin_delete_conversation: {
+        Args: { _conversation_id: string }
+        Returns: undefined
+      }
       admin_get_stats: { Args: never; Returns: Json }
+      admin_grant_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      admin_list_audit_log: { Args: { _limit?: number }; Returns: Json }
       admin_list_conversations: {
         Args: { _limit?: number; _offset?: number }
         Returns: Json
@@ -512,7 +582,28 @@ export type Database = {
         Args: { _limit?: number; _offset?: number; _search?: string }
         Returns: Json
       }
+      admin_revoke_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      admin_set_setting: {
+        Args: { _key: string; _value: Json }
+        Returns: undefined
+      }
+      admin_set_subscription: {
+        Args: {
+          _plan: string
+          _plan_type: string
+          _status?: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       admin_top_countries: { Args: { _limit?: number }; Returns: Json }
+      admin_unban_user: { Args: { _user_id: string }; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

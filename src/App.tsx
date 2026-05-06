@@ -24,6 +24,8 @@ import EduPricing from "./pages/EduPricing";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
+import { AppSettingsBanner } from "@/components/AppSettingsBanner";
+import { MaintenanceGate } from "@/components/MaintenanceGate";
 
 const queryClient = new QueryClient();
 
@@ -40,7 +42,9 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <Routes>
+            <MaintenanceGate>
+              <AppSettingsBanner />
+              <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route
@@ -121,7 +125,8 @@ const App = () => (
               <Route path="/admin" element={<Admin />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
-            </Routes>
+              </Routes>
+            </MaintenanceGate>
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>

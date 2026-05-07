@@ -10,12 +10,12 @@ export async function trackUsage(
   try {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    await supabase.from("feature_usage").insert({
+    await supabase.from("feature_usage").insert([{
       user_id: user.id,
       feature,
       item_key: itemKey ?? null,
-      metadata: metadata ?? {},
-    });
+      metadata: (metadata ?? {}) as any,
+    }]);
   } catch {
     // silent — analytics shouldn't break UX
   }

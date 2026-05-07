@@ -2,6 +2,7 @@ import { ArrowLeft, Heart, Wind, Flame, Droplets, Bone, AlertTriangle, Baby, Zap
 import { Button } from "@/components/ui/button";
 import { SantraLogo } from "@/components/SantraLogo";
 import { useNavigate } from "react-router-dom";
+import { trackUsage } from "@/lib/trackUsage";
 import {
   Accordion,
   AccordionContent,

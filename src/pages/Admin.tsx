@@ -3,7 +3,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Shield, Mail, Ban, Trash2, Users, MessageSquare,
   CreditCard, Settings as SettingsIcon, Activity, Megaphone, Wrench,
-  ToggleLeft, UserCog, Search, ShieldCheck, ShieldOff,
+  ToggleLeft, UserCog, Search, ShieldCheck, ShieldOff, BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

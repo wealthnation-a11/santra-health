@@ -161,7 +161,7 @@ export default function Tools() {
       </header>
 
       <div className="max-w-2xl mx-auto px-4 py-6">
-        <Tabs defaultValue="bmi" className="space-y-4">
+        <Tabs defaultValue="bmi" className="space-y-4" onValueChange={(v) => trackUsage("health_tool", v)}>
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="bmi" className="gap-1.5"><Calculator size={14} />BMI</TabsTrigger>
             <TabsTrigger value="water" className="gap-1.5"><Droplets size={14} />Water</TabsTrigger>

@@ -494,7 +494,87 @@ export default function Admin() {
             </Card>
           </TabsContent>
 
-          {/* AUDIT LOG */}
+          {/* ENGAGEMENT */}
+          <TabsContent value="engagement" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <StatCard icon={<Activity size={18} />} label="First Aid views (30d)" value={engagement?.totals?.first_aid ?? 0} />
+              <StatCard icon={<Activity size={18} />} label="Health Tool uses (30d)" value={engagement?.totals?.health_tool ?? 0} />
+              <StatCard icon={<Activity size={18} />} label="Library opens (30d)" value={engagement?.totals?.library ?? 0} />
+            </div>
+
+            <Card>
+              <CardHeader><CardTitle className="text-lg">Top items (30 days)</CardTitle></CardHeader>
+              <CardContent className="p-0">
+                {(!engagement?.by_item || engagement.by_item.length === 0) ? (
+                  <p className="p-6 text-sm text-muted-foreground">No usage tracked yet.</p>
+                ) : (
+                  <Table>
+                    <TableHeader><TableRow>
+                      <TableHead>Feature</TableHead><TableHead>Item</TableHead><TableHead className="text-right">Count</TableHead>
+                    </TableRow></TableHeader>
+                    <TableBody>
+                      {engagement.by_item.map((i: any, idx: number) => (
+                        <TableRow key={idx}>
+                          <TableCell><Badge variant="outline">{i.feature}</Badge></TableCell>
+                          <TableCell className="text-sm">{i.item_key}</TableCell>
+                          <TableCell className="text-right font-medium">{i.count}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader><CardTitle className="text-lg">Library chats (30 days)</CardTitle></CardHeader>
+              <CardContent className="p-0">
+                {(!engagement?.library_conversations || engagement.library_conversations.length === 0) ? (
+                  <p className="p-6 text-sm text-muted-foreground">No library conversations yet.</p>
+                ) : (
+                  <Table>
+                    <TableHeader><TableRow>
+                      <TableHead>Library</TableHead><TableHead className="text-right">Conversations</TableHead>
+                    </TableRow></TableHeader>
+                    <TableBody>
+                      {engagement.library_conversations.map((l: any, idx: number) => (
+                        <TableRow key={idx}>
+                          <TableCell className="text-sm">{l.library_id}</TableCell>
+                          <TableCell className="text-right font-medium">{l.count}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader><CardTitle className="text-lg">Recent activity</CardTitle></CardHeader>
+              <CardContent className="p-0">
+                {(!engagement?.recent || engagement.recent.length === 0) ? (
+                  <p className="p-6 text-sm text-muted-foreground">No recent activity.</p>
+                ) : (
+                  <Table>
+                    <TableHeader><TableRow>
+                      <TableHead>User</TableHead><TableHead>Feature</TableHead><TableHead>Item</TableHead><TableHead>When</TableHead>
+                    </TableRow></TableHeader>
+                    <TableBody>
+                      {engagement.recent.map((r: any) => (
+                        <TableRow key={r.id}>
+                          <TableCell className="text-sm">{r.full_name || "—"}</TableCell>
+                          <TableCell><Badge variant="outline">{r.feature}</Badge></TableCell>
+                          <TableCell className="text-xs text-muted-foreground">{r.item_key || "—"}</TableCell>
+                          <TableCell className="text-sm text-muted-foreground">{new Date(r.created_at).toLocaleString()}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="audit">
             <Card>
               <CardContent className="p-0">

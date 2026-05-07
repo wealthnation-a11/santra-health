@@ -216,16 +216,18 @@ export default function Admin() {
           </div>
         )}
 
-        <Tabs defaultValue="users" className="space-y-4">
-          <TabsList className="flex-wrap h-auto">
-            <TabsTrigger value="users"><Users size={14} className="mr-1.5" /> Users</TabsTrigger>
-            <TabsTrigger value="conversations"><MessageSquare size={14} className="mr-1.5" /> Content</TabsTrigger>
-            <TabsTrigger value="subs"><CreditCard size={14} className="mr-1.5" /> Subscriptions</TabsTrigger>
-            <TabsTrigger value="settings"><SettingsIcon size={14} className="mr-1.5" /> App settings</TabsTrigger>
-            <TabsTrigger value="blocked"><Ban size={14} className="mr-1.5" /> Blocked</TabsTrigger>
-            <TabsTrigger value="waitlist"><Mail size={14} className="mr-1.5" /> Waitlist</TabsTrigger>
-            <TabsTrigger value="audit"><Activity size={14} className="mr-1.5" /> Audit log</TabsTrigger>
+        <Tabs defaultValue="users" orientation="vertical" className="flex flex-col md:flex-row gap-6">
+          <TabsList className="flex md:flex-col h-auto w-full md:w-56 shrink-0 bg-card border border-border p-2 gap-1 md:sticky md:top-20 md:self-start overflow-x-auto md:overflow-visible">
+            <TabsTrigger value="users" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><Users size={14} className="mr-2" /> Users</TabsTrigger>
+            <TabsTrigger value="conversations" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><MessageSquare size={14} className="mr-2" /> Content</TabsTrigger>
+            <TabsTrigger value="subs" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><CreditCard size={14} className="mr-2" /> Subscriptions</TabsTrigger>
+            <TabsTrigger value="settings" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><SettingsIcon size={14} className="mr-2" /> App settings</TabsTrigger>
+            <TabsTrigger value="blocked" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><Ban size={14} className="mr-2" /> Blocked</TabsTrigger>
+            <TabsTrigger value="waitlist" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><Mail size={14} className="mr-2" /> Waitlist</TabsTrigger>
+            <TabsTrigger value="audit" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><Activity size={14} className="mr-2" /> Audit log</TabsTrigger>
           </TabsList>
+          <div className="flex-1 min-w-0 space-y-4">
+
 
           {/* USERS */}
           <TabsContent value="users">

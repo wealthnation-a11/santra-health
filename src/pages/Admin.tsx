@@ -84,7 +84,7 @@ export default function Admin() {
   }, [user, authLoading]);
 
   const loadAll = async () => {
-    const [statsRes, usersRes, convRes, subRes, auditRes, b, w, settings] = await Promise.all([
+    const [statsRes, usersRes, convRes, subRes, auditRes, b, w, settings, engRes] = await Promise.all([
       supabase.rpc("admin_get_stats"),
       supabase.rpc("admin_list_users", { _limit: 100, _offset: 0, _search: "" }),
       supabase.rpc("admin_list_conversations", { _limit: 100, _offset: 0 }),
@@ -93,6 +93,7 @@ export default function Admin() {
       supabase.from("blocked_signups").select("*").order("attempted_at", { ascending: false }).limit(200),
       supabase.from("edu_pro_waitlist").select("*").order("created_at", { ascending: false }).limit(200),
       supabase.from("app_settings").select("*"),
+      supabase.rpc("admin_feature_usage_stats", { _days: 30, _limit: 100 }),
     ]);
     if (statsRes.data) setStats(statsRes.data);
     if (usersRes.data && (usersRes.data as any).users) setUsers((usersRes.data as any).users);

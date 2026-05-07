@@ -72,7 +72,7 @@ export function AppSettingsBanner() {
         <AlertCircle size={16} className="shrink-0" />
         <span className="flex-1">{banner.message}</span>
         <button
-          onClick={() => setDismissed(true)}
+          onClick={dismiss}
           className="opacity-60 hover:opacity-100"
           aria-label="Dismiss"
         >

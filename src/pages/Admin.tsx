@@ -3,7 +3,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Shield, Mail, Ban, Trash2, Users, MessageSquare,
   CreditCard, Settings as SettingsIcon, Activity, Megaphone, Wrench,
-  ToggleLeft, UserCog, Search, ShieldCheck, ShieldOff,
+  ToggleLeft, UserCog, Search, ShieldCheck, ShieldOff, BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -61,6 +61,7 @@ export default function Admin() {
   const [audit, setAudit] = useState<AuditRow[]>([]);
   const [blocked, setBlocked] = useState<BlockedRow[]>([]);
   const [waitlist, setWaitlist] = useState<WaitlistRow[]>([]);
+  const [engagement, setEngagement] = useState<any>(null);
 
   // settings
   const [banner, setBanner] = useState({ enabled: false, message: "", variant: "info" });
@@ -83,7 +84,7 @@ export default function Admin() {
   }, [user, authLoading]);
 
   const loadAll = async () => {
-    const [statsRes, usersRes, convRes, subRes, auditRes, b, w, settings] = await Promise.all([
+    const [statsRes, usersRes, convRes, subRes, auditRes, b, w, settings, engRes] = await Promise.all([
       supabase.rpc("admin_get_stats"),
       supabase.rpc("admin_list_users", { _limit: 100, _offset: 0, _search: "" }),
       supabase.rpc("admin_list_conversations", { _limit: 100, _offset: 0 }),
@@ -92,6 +93,7 @@ export default function Admin() {
       supabase.from("blocked_signups").select("*").order("attempted_at", { ascending: false }).limit(200),
       supabase.from("edu_pro_waitlist").select("*").order("created_at", { ascending: false }).limit(200),
       supabase.from("app_settings").select("*"),
+      supabase.rpc("admin_feature_usage_stats", { _days: 30, _limit: 100 }),
     ]);
     if (statsRes.data) setStats(statsRes.data);
     if (usersRes.data && (usersRes.data as any).users) setUsers((usersRes.data as any).users);
@@ -100,6 +102,7 @@ export default function Admin() {
     if (auditRes.data) setAudit(auditRes.data as any);
     if (b.data) setBlocked(b.data as BlockedRow[]);
     if (w.data) setWaitlist(w.data as WaitlistRow[]);
+    if (engRes.data) setEngagement(engRes.data);
     if (settings.data) {
       for (const row of settings.data as any[]) {
         if (row.key === "broadcast_banner") setBanner(row.value);
@@ -221,6 +224,7 @@ export default function Admin() {
             <TabsTrigger value="users" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><Users size={14} className="mr-2" /> Users</TabsTrigger>
             <TabsTrigger value="conversations" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><MessageSquare size={14} className="mr-2" /> Content</TabsTrigger>
             <TabsTrigger value="subs" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><CreditCard size={14} className="mr-2" /> Subscriptions</TabsTrigger>
+            <TabsTrigger value="engagement" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><BarChart3 size={14} className="mr-2" /> Engagement</TabsTrigger>
             <TabsTrigger value="settings" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><SettingsIcon size={14} className="mr-2" /> App settings</TabsTrigger>
             <TabsTrigger value="blocked" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><Ban size={14} className="mr-2" /> Blocked</TabsTrigger>
             <TabsTrigger value="waitlist" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><Mail size={14} className="mr-2" /> Waitlist</TabsTrigger>
@@ -490,7 +494,87 @@ export default function Admin() {
             </Card>
           </TabsContent>
 
-          {/* AUDIT LOG */}
+          {/* ENGAGEMENT */}
+          <TabsContent value="engagement" className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <StatCard icon={<Activity size={18} />} label="First Aid views (30d)" value={engagement?.totals?.first_aid ?? 0} />
+              <StatCard icon={<Activity size={18} />} label="Health Tool uses (30d)" value={engagement?.totals?.health_tool ?? 0} />
+              <StatCard icon={<Activity size={18} />} label="Library opens (30d)" value={engagement?.totals?.library ?? 0} />
+            </div>
+
+            <Card>
+              <CardHeader><CardTitle className="text-lg">Top items (30 days)</CardTitle></CardHeader>
+              <CardContent className="p-0">
+                {(!engagement?.by_item || engagement.by_item.length === 0) ? (
+                  <p className="p-6 text-sm text-muted-foreground">No usage tracked yet.</p>
+                ) : (
+                  <Table>
+                    <TableHeader><TableRow>
+                      <TableHead>Feature</TableHead><TableHead>Item</TableHead><TableHead className="text-right">Count</TableHead>
+                    </TableRow></TableHeader>
+                    <TableBody>
+                      {engagement.by_item.map((i: any, idx: number) => (
+                        <TableRow key={idx}>
+                          <TableCell><Badge variant="outline">{i.feature}</Badge></TableCell>
+                          <TableCell className="text-sm">{i.item_key}</TableCell>
+                          <TableCell className="text-right font-medium">{i.count}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader><CardTitle className="text-lg">Library chats (30 days)</CardTitle></CardHeader>
+              <CardContent className="p-0">
+                {(!engagement?.library_conversations || engagement.library_conversations.length === 0) ? (
+                  <p className="p-6 text-sm text-muted-foreground">No library conversations yet.</p>
+                ) : (
+                  <Table>
+                    <TableHeader><TableRow>
+                      <TableHead>Library</TableHead><TableHead className="text-right">Conversations</TableHead>
+                    </TableRow></TableHeader>
+                    <TableBody>
+                      {engagement.library_conversations.map((l: any, idx: number) => (
+                        <TableRow key={idx}>
+                          <TableCell className="text-sm">{l.library_id}</TableCell>
+                          <TableCell className="text-right font-medium">{l.count}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader><CardTitle className="text-lg">Recent activity</CardTitle></CardHeader>
+              <CardContent className="p-0">
+                {(!engagement?.recent || engagement.recent.length === 0) ? (
+                  <p className="p-6 text-sm text-muted-foreground">No recent activity.</p>
+                ) : (
+                  <Table>
+                    <TableHeader><TableRow>
+                      <TableHead>User</TableHead><TableHead>Feature</TableHead><TableHead>Item</TableHead><TableHead>When</TableHead>
+                    </TableRow></TableHeader>
+                    <TableBody>
+                      {engagement.recent.map((r: any) => (
+                        <TableRow key={r.id}>
+                          <TableCell className="text-sm">{r.full_name || "—"}</TableCell>
+                          <TableCell><Badge variant="outline">{r.feature}</Badge></TableCell>
+                          <TableCell className="text-xs text-muted-foreground">{r.item_key || "—"}</TableCell>
+                          <TableCell className="text-sm text-muted-foreground">{new Date(r.created_at).toLocaleString()}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="audit">
             <Card>
               <CardContent className="p-0">

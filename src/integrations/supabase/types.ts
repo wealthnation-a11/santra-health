@@ -200,6 +200,33 @@ export type Database = {
         }
         Relationships: []
       }
+      feature_usage: {
+        Row: {
+          created_at: string
+          feature: string
+          id: string
+          item_key: string | null
+          metadata: Json | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          feature: string
+          id?: string
+          item_key?: string | null
+          metadata?: Json | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          feature?: string
+          id?: string
+          item_key?: string | null
+          metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       health_profiles: {
         Row: {
           allergies: string[] | null
@@ -555,6 +582,10 @@ export type Database = {
       admin_delete_conversation: {
         Args: { _conversation_id: string }
         Returns: undefined
+      }
+      admin_feature_usage_stats: {
+        Args: { _days?: number; _limit?: number }
+        Returns: Json
       }
       admin_get_stats: { Args: never; Returns: Json }
       admin_grant_role: {

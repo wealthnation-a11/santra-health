@@ -8,6 +8,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { EduUpgradeModal } from "@/components/EduUpgradeModal";
 import { useEduSubscription } from "@/hooks/useEduSubscription";
 import { libraries, type LibraryTier } from "@/data/libraries";
+import { trackUsage } from "@/lib/trackUsage";
 
 const iconMap: Record<string, LucideIcon> = {
   BookOpen, Heart, Activity, Pill, TestTube, FileText, GraduationCap, Search,
@@ -42,6 +43,7 @@ export default function Libraries() {
       return;
     }
 
+    trackUsage("library", libraryId, { tier: lib.tier, name: lib.name });
     navigate(`/library/${libraryId}`);
   };
 

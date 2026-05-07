@@ -2,6 +2,7 @@ import { ArrowLeft, Heart, Wind, Flame, Droplets, Bone, AlertTriangle, Baby, Zap
 import { Button } from "@/components/ui/button";
 import { SantraLogo } from "@/components/SantraLogo";
 import { useNavigate } from "react-router-dom";
+import { trackUsage } from "@/lib/trackUsage";
 import {
   Accordion,
   AccordionContent,
@@ -171,7 +172,7 @@ export default function FirstAid() {
           </div>
         </div>
 
-        <Accordion type="single" collapsible className="space-y-3">
+        <Accordion type="single" collapsible className="space-y-3" onValueChange={(v) => v && trackUsage("first_aid", v)}>
           {firstAidGuides.map((guide) => {
             const Icon = guide.icon;
             return (

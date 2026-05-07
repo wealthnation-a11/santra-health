@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Calculator, Droplets, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { trackUsage } from "@/lib/trackUsage";
 
 function BMICalculator() {
   const [height, setHeight] = useState("");
@@ -146,6 +147,7 @@ function CalorieEstimator() {
 
 export default function Tools() {
   const navigate = useNavigate();
+  useEffect(() => { trackUsage("health_tool", "bmi"); }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -160,7 +162,7 @@ export default function Tools() {
       </header>
 
       <div className="max-w-2xl mx-auto px-4 py-6">
-        <Tabs defaultValue="bmi" className="space-y-4">
+        <Tabs defaultValue="bmi" className="space-y-4" onValueChange={(v) => trackUsage("health_tool", v)}>
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="bmi" className="gap-1.5"><Calculator size={14} />BMI</TabsTrigger>
             <TabsTrigger value="water" className="gap-1.5"><Droplets size={14} />Water</TabsTrigger>

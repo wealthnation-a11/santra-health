@@ -43,6 +43,7 @@ export default function Libraries() {
       return;
     }
 
+    trackUsage("library", libraryId, { tier: lib.tier, name: lib.name });
     navigate(`/library/${libraryId}`);
   };
 

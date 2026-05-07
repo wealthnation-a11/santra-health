@@ -224,6 +224,7 @@ export default function Admin() {
             <TabsTrigger value="users" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><Users size={14} className="mr-2" /> Users</TabsTrigger>
             <TabsTrigger value="conversations" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><MessageSquare size={14} className="mr-2" /> Content</TabsTrigger>
             <TabsTrigger value="subs" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><CreditCard size={14} className="mr-2" /> Subscriptions</TabsTrigger>
+            <TabsTrigger value="engagement" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><BarChart3 size={14} className="mr-2" /> Engagement</TabsTrigger>
             <TabsTrigger value="settings" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><SettingsIcon size={14} className="mr-2" /> App settings</TabsTrigger>
             <TabsTrigger value="blocked" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><Ban size={14} className="mr-2" /> Blocked</TabsTrigger>
             <TabsTrigger value="waitlist" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><Mail size={14} className="mr-2" /> Waitlist</TabsTrigger>

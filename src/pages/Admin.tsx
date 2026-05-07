@@ -102,6 +102,7 @@ export default function Admin() {
     if (auditRes.data) setAudit(auditRes.data as any);
     if (b.data) setBlocked(b.data as BlockedRow[]);
     if (w.data) setWaitlist(w.data as WaitlistRow[]);
+    if (engRes.data) setEngagement(engRes.data);
     if (settings.data) {
       for (const row of settings.data as any[]) {
         if (row.key === "broadcast_banner") setBanner(row.value);

@@ -8,9 +8,19 @@ interface BannerSetting {
   variant?: "info" | "warning" | "success";
 }
 
+const STORAGE_KEY = "santra_banner_dismissed";
+
+const hashMessage = (msg: string) => {
+  let h = 0;
+  for (let i = 0; i < msg.length; i++) h = (h << 5) - h + msg.charCodeAt(i);
+  return String(h);
+};
+
 export function AppSettingsBanner() {
   const [banner, setBanner] = useState<BannerSetting | null>(null);
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissedHash, setDismissedHash] = useState<string | null>(() => {
+    try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
+  });
 
   useEffect(() => {
     const load = async () => {
@@ -30,7 +40,6 @@ export function AppSettingsBanner() {
         (payload: any) => {
           if (payload.new?.value) {
             setBanner(payload.new.value as unknown as BannerSetting);
-            setDismissed(false);
           }
         }
       )
@@ -40,7 +49,15 @@ export function AppSettingsBanner() {
     };
   }, []);
 
-  if (!banner?.enabled || !banner.message || dismissed) return null;
+  const dismiss = () => {
+    if (!banner?.message) return;
+    const h = hashMessage(banner.message);
+    try { localStorage.setItem(STORAGE_KEY, h); } catch {}
+    setDismissedHash(h);
+  };
+
+  const currentHash = banner?.message ? hashMessage(banner.message) : null;
+  if (!banner?.enabled || !banner.message || dismissedHash === currentHash) return null;
 
   const variantClass =
     banner.variant === "warning"

@@ -517,6 +517,7 @@ export default function Admin() {
               </CardContent>
             </Card>
           </TabsContent>
+          </div>
         </Tabs>
       </main>
     </div>

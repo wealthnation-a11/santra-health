@@ -172,7 +172,7 @@ export default function FirstAid() {
           </div>
         </div>
 
-        <Accordion type="single" collapsible className="space-y-3">
+        <Accordion type="single" collapsible className="space-y-3" onValueChange={(v) => v && trackUsage("first_aid", v)}>
           {firstAidGuides.map((guide) => {
             const Icon = guide.icon;
             return (

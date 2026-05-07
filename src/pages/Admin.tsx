@@ -61,6 +61,7 @@ export default function Admin() {
   const [audit, setAudit] = useState<AuditRow[]>([]);
   const [blocked, setBlocked] = useState<BlockedRow[]>([]);
   const [waitlist, setWaitlist] = useState<WaitlistRow[]>([]);
+  const [engagement, setEngagement] = useState<any>(null);
 
   // settings
   const [banner, setBanner] = useState({ enabled: false, message: "", variant: "info" });

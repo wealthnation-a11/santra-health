@@ -182,6 +182,55 @@ export default function Admin() {
     setWaitlist((p) => p.filter((r) => r.id !== id));
   };
 
+  // Derived: top first-aid sections + top health-tool actions
+  const topFirstAidSections = useMemo(() => {
+    const items = (engagement?.by_item || []).filter((i: any) => i.feature === "first_aid_section" || i.feature === "first_aid");
+    const map = new Map<string, number>();
+    items.forEach((i: any) => map.set(i.item_key, (map.get(i.item_key) || 0) + Number(i.count || 0)));
+    return Array.from(map.entries()).map(([item_key, count]) => ({ item_key, count })).sort((a, b) => b.count - a.count).slice(0, 10);
+  }, [engagement]);
+
+  const topHealthToolActions = useMemo(() => {
+    return (engagement?.by_item || []).filter((i: any) => i.feature === "health_tool_action" || i.feature === "health_tool")
+      .sort((a: any, b: any) => b.count - a.count).slice(0, 10);
+  }, [engagement]);
+
+  const downloadFile = (content: string, filename: string, mime: string) => {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const toCsv = (rows: any[]) => {
+    if (!rows || rows.length === 0) return "";
+    const headers = Array.from(new Set(rows.flatMap((r) => Object.keys(r))));
+    const escape = (v: any) => {
+      if (v === null || v === undefined) return "";
+      const s = typeof v === "object" ? JSON.stringify(v) : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    return [headers.join(","), ...rows.map((r) => headers.map((h) => escape(r[h])).join(","))].join("\n");
+  };
+
+  const exportData = async (kind: "engagement" | "users", format: "csv" | "json") => {
+    const fromTs = new Date(exportFrom + "T00:00:00").toISOString();
+    const toTs = new Date(exportTo + "T23:59:59.999").toISOString();
+    const rpc = kind === "engagement"
+      ? supabase.rpc("admin_export_feature_usage" as any, { _from: fromTs, _to: toTs, _feature: "" })
+      : supabase.rpc("admin_export_users" as any, { _from: fromTs, _to: toTs });
+    const { data, error } = await rpc;
+    if (error) return toast.error(error.message);
+    const rows: any[] = (data as any[]) || [];
+    if (rows.length === 0) return toast.info("No rows in selected range");
+    const filename = `${kind}-${exportFrom}-to-${exportTo}.${format}`;
+    if (format === "json") downloadFile(JSON.stringify(rows, null, 2), filename, "application/json");
+    else downloadFile(toCsv(rows), filename, "text/csv");
+    toast.success(`Exported ${rows.length} rows`);
+  };
+
   if (authLoading || checking) {
     return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading...</div>;
   }

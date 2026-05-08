@@ -554,10 +554,108 @@ export default function Admin() {
           {/* ENGAGEMENT */}
           <TabsContent value="engagement" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <StatCard icon={<Activity size={18} />} label="First Aid views (30d)" value={engagement?.totals?.first_aid ?? 0} />
-              <StatCard icon={<Activity size={18} />} label="Health Tool uses (30d)" value={engagement?.totals?.health_tool ?? 0} />
-              <StatCard icon={<Activity size={18} />} label="Library opens (30d)" value={engagement?.totals?.library ?? 0} />
+              <StatCard icon={<Activity size={18} />} label="First Aid events (30d)" value={
+                ((engagement?.totals?.first_aid ?? 0) as number) + ((engagement?.totals?.first_aid_section ?? 0) as number)
+              } />
+              <StatCard icon={<Activity size={18} />} label="Health Tool events (30d)" value={
+                ((engagement?.totals?.health_tool ?? 0) as number) + ((engagement?.totals?.health_tool_action ?? 0) as number)
+              } />
+              <StatCard icon={<Activity size={18} />} label="Library events (30d)" value={
+                ((engagement?.totals?.library ?? 0) as number)
+                + ((engagement?.totals?.library_dwell ?? 0) as number)
+                + ((engagement?.totals?.library_chat_start ?? 0) as number)
+              } />
             </div>
+
+            {/* Export */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg"><Download size={18} className="text-primary" /> Export analytics</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <Label>From</Label>
+                    <Input type="date" value={exportFrom} onChange={(e) => setExportFrom(e.target.value)} />
+                  </div>
+                  <div>
+                    <Label>To</Label>
+                    <Input type="date" value={exportTo} onChange={(e) => setExportTo(e.target.value)} />
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button size="sm" variant="outline" onClick={() => exportData("engagement", "csv")}><Download size={14} /> Engagement CSV</Button>
+                  <Button size="sm" variant="outline" onClick={() => exportData("engagement", "json")}><Download size={14} /> Engagement JSON</Button>
+                  <Button size="sm" variant="outline" onClick={() => exportData("users", "csv")}><Download size={14} /> Users CSV</Button>
+                  <Button size="sm" variant="outline" onClick={() => exportData("users", "json")}><Download size={14} /> Users JSON</Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 7-day daily trend */}
+            <Card>
+              <CardHeader><CardTitle className="text-lg">Daily trend (7 days)</CardTitle></CardHeader>
+              <CardContent>
+                <div className="h-64 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={dailyTrend.map((d) => ({ ...d, date: new Date(d.date).toLocaleDateString(undefined, { month: "short", day: "numeric" }) }))}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                      <XAxis dataKey="date" className="text-xs" />
+                      <YAxis className="text-xs" allowDecimals={false} />
+                      <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
+                      <Legend />
+                      <Line type="monotone" dataKey="first_aid" stroke="hsl(var(--destructive))" strokeWidth={2} name="First Aid" />
+                      <Line type="monotone" dataKey="health_tool" stroke="hsl(var(--primary))" strokeWidth={2} name="Health Tools" />
+                      <Line type="monotone" dataKey="library" stroke="hsl(var(--accent-foreground))" strokeWidth={2} name="Library" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Top First Aid sections */}
+            <Card>
+              <CardHeader><CardTitle className="text-lg">Top First Aid guides (30 days)</CardTitle></CardHeader>
+              <CardContent className="p-0">
+                {topFirstAidSections.length === 0 ? (
+                  <p className="p-6 text-sm text-muted-foreground">No First Aid views yet.</p>
+                ) : (
+                  <Table>
+                    <TableHeader><TableRow><TableHead>Guide</TableHead><TableHead className="text-right">Opens</TableHead></TableRow></TableHeader>
+                    <TableBody>
+                      {topFirstAidSections.map((i, idx) => (
+                        <TableRow key={idx}>
+                          <TableCell className="text-sm">{i.item_key}</TableCell>
+                          <TableCell className="text-right font-medium">{i.count}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Top Health Tool actions */}
+            <Card>
+              <CardHeader><CardTitle className="text-lg">Health Tools usage (30 days)</CardTitle></CardHeader>
+              <CardContent className="p-0">
+                {topHealthToolActions.length === 0 ? (
+                  <p className="p-6 text-sm text-muted-foreground">No health tool activity yet.</p>
+                ) : (
+                  <Table>
+                    <TableHeader><TableRow><TableHead>Tool</TableHead><TableHead className="text-right">Events</TableHead></TableRow></TableHeader>
+                    <TableBody>
+                      {topHealthToolActions.map((i: any, idx: number) => (
+                        <TableRow key={idx}>
+                          <TableCell className="text-sm">{i.item_key}</TableCell>
+                          <TableCell className="text-right font-medium">{i.count}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
 
             <Card>
               <CardHeader><CardTitle className="text-lg">Top items (30 days)</CardTitle></CardHeader>

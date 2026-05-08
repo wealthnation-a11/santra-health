@@ -180,6 +180,7 @@ export default function LibraryChat() {
     if (!conversationId) {
       conversationId = await createConversation(content.slice(0, 30) + (content.length > 30 ? "..." : ""));
       if (!conversationId) return;
+      trackUsage("library_chat_start", libraryId, { libraryName: library.name });
     }
 
     await addMessage(conversationId, content, "user");

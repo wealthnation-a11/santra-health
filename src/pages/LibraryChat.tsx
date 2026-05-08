@@ -57,6 +57,18 @@ export default function LibraryChat() {
     }
   }, [library, canAccess]);
 
+  // Track dwell time
+  useEffect(() => {
+    if (!libraryId) return;
+    const start = Date.now();
+    return () => {
+      const seconds = Math.round((Date.now() - start) / 1000);
+      if (seconds >= 3) {
+        trackUsage("library_dwell", libraryId, { seconds });
+      }
+    };
+  }, [libraryId]);
+
   const {
     activeConversation,
     createConversation,

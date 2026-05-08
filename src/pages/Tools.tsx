@@ -147,7 +147,10 @@ function CalorieEstimator() {
 
 export default function Tools() {
   const navigate = useNavigate();
-  useEffect(() => { trackUsage("health_tool", "bmi"); }, []);
+  useEffect(() => {
+    trackUsage("health_tool", "bmi");
+    trackUsage("health_tool_action", "bmi", { action: "open" });
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">

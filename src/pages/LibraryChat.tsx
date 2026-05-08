@@ -13,6 +13,7 @@ import { useLibraryConversations } from "@/hooks/useLibraryConversations";
 import { useEduSubscription } from "@/hooks/useEduSubscription";
 import { getLibraryById } from "@/data/libraries";
 import { findLastIndex } from "@/lib/arrayUtils";
+import { trackUsage } from "@/lib/trackUsage";
 import { toast } from "sonner";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/library-chat`;

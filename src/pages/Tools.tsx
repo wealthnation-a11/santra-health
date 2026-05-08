@@ -13,6 +13,11 @@ function BMICalculator() {
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const bmi = height && weight ? (parseFloat(weight) / ((parseFloat(height) / 100) ** 2)) : null;
+  useEffect(() => {
+    if (bmi && bmi > 0 && bmi < 100) {
+      trackUsage("health_tool_action", "bmi", { action: "calculate", value: Number(bmi.toFixed(1)) });
+    }
+  }, [bmi]);
   const getCategory = (bmi: number) => {
     if (bmi < 18.5) return { label: "Underweight", color: "text-blue-500" };
     if (bmi < 25) return { label: "Normal", color: "text-primary" };
@@ -48,6 +53,11 @@ function WaterIntakeCalculator() {
   const [activity, setActivity] = useState("moderate");
   const multiplier = activity === "low" ? 30 : activity === "moderate" ? 35 : 40;
   const intake = weight ? ((parseFloat(weight) * multiplier) / 1000) : null;
+  useEffect(() => {
+    if (intake && intake > 0) {
+      trackUsage("health_tool_action", "water", { action: "calculate", value: Number(intake.toFixed(1)) });
+    }
+  }, [intake]);
 
   return (
     <div className="space-y-4">
@@ -90,6 +100,11 @@ function CalorieEstimator() {
       : 10 * parseFloat(weight) + 6.25 * parseFloat(height) - 5 * parseFloat(age) - 161
     : null;
   const tdee = bmr ? bmr * parseFloat(activity) : null;
+  useEffect(() => {
+    if (tdee && tdee > 0) {
+      trackUsage("health_tool_action", "calories", { action: "calculate", value: Math.round(tdee) });
+    }
+  }, [tdee]);
 
   return (
     <div className="space-y-4">
@@ -147,7 +162,10 @@ function CalorieEstimator() {
 
 export default function Tools() {
   const navigate = useNavigate();
-  useEffect(() => { trackUsage("health_tool", "bmi"); }, []);
+  useEffect(() => {
+    trackUsage("health_tool", "bmi");
+    trackUsage("health_tool_action", "bmi", { action: "open" });
+  }, []);
 
   return (
     <div className="min-h-screen bg-background">
@@ -162,7 +180,10 @@ export default function Tools() {
       </header>
 
       <div className="max-w-2xl mx-auto px-4 py-6">
-        <Tabs defaultValue="bmi" className="space-y-4" onValueChange={(v) => trackUsage("health_tool", v)}>
+        <Tabs defaultValue="bmi" className="space-y-4" onValueChange={(v) => {
+          trackUsage("health_tool", v);
+          trackUsage("health_tool_action", v, { action: "open" });
+        }}>
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="bmi" className="gap-1.5"><Calculator size={14} />BMI</TabsTrigger>
             <TabsTrigger value="water" className="gap-1.5"><Droplets size={14} />Water</TabsTrigger>

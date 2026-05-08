@@ -13,6 +13,7 @@ import { useLibraryConversations } from "@/hooks/useLibraryConversations";
 import { useEduSubscription } from "@/hooks/useEduSubscription";
 import { getLibraryById } from "@/data/libraries";
 import { findLastIndex } from "@/lib/arrayUtils";
+import { trackUsage } from "@/lib/trackUsage";
 import { toast } from "sonner";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/library-chat`;
@@ -55,6 +56,18 @@ export default function LibraryChat() {
       setShowUpgradeModal(true);
     }
   }, [library, canAccess]);
+
+  // Track dwell time
+  useEffect(() => {
+    if (!libraryId) return;
+    const start = Date.now();
+    return () => {
+      const seconds = Math.round((Date.now() - start) / 1000);
+      if (seconds >= 3) {
+        trackUsage("library_dwell", libraryId, { seconds });
+      }
+    };
+  }, [libraryId]);
 
   const {
     activeConversation,
@@ -180,6 +193,7 @@ export default function LibraryChat() {
     if (!conversationId) {
       conversationId = await createConversation(content.slice(0, 30) + (content.length > 30 ? "..." : ""));
       if (!conversationId) return;
+      trackUsage("library_chat_start", libraryId, { libraryName: library.name });
     }
 
     await addMessage(conversationId, content, "user");

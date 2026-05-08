@@ -395,6 +395,7 @@ export type Database = {
           onboarding_completed: boolean
           phone: string | null
           preferred_language: string | null
+          signup_country: string | null
           state: string | null
           terms_accepted_at: string | null
           updated_at: string
@@ -411,6 +412,7 @@ export type Database = {
           onboarding_completed?: boolean
           phone?: string | null
           preferred_language?: string | null
+          signup_country?: string | null
           state?: string | null
           terms_accepted_at?: string | null
           updated_at?: string
@@ -427,6 +429,7 @@ export type Database = {
           onboarding_completed?: boolean
           phone?: string | null
           preferred_language?: string | null
+          signup_country?: string | null
           state?: string | null
           terms_accepted_at?: string | null
           updated_at?: string
@@ -577,11 +580,20 @@ export type Database = {
         Args: { _reason?: string; _user_id: string }
         Returns: undefined
       }
+      admin_daily_feature_usage: { Args: { _days?: number }; Returns: Json }
       admin_daily_messages: { Args: { _days?: number }; Returns: Json }
       admin_daily_signups: { Args: { _days?: number }; Returns: Json }
       admin_delete_conversation: {
         Args: { _conversation_id: string }
         Returns: undefined
+      }
+      admin_export_feature_usage: {
+        Args: { _feature?: string; _from: string; _to: string }
+        Returns: Json
+      }
+      admin_export_users: {
+        Args: { _from: string; _to: string }
+        Returns: Json
       }
       admin_feature_usage_stats: {
         Args: { _days?: number; _limit?: number }

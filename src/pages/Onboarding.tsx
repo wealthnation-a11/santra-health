@@ -48,10 +48,11 @@ export default function Onboarding() {
       const { error } = await updateProfile({
         full_name: fullName.trim(),
         country,
+        signup_country: country,
         state,
         terms_accepted_at: new Date().toISOString(),
         onboarding_completed: true,
-      });
+      } as any);
 
       if (error) {
         toast({

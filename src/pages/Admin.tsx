@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Shield, Mail, Ban, Trash2, Users, MessageSquare,
   CreditCard, Settings as SettingsIcon, Activity, Megaphone, Wrench,
-  ToggleLeft, UserCog, Search, ShieldCheck, ShieldOff, BarChart3,
+  ToggleLeft, UserCog, Search, ShieldCheck, ShieldOff, BarChart3, Download,
 } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, CartesianGrid } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,6 +63,11 @@ export default function Admin() {
   const [blocked, setBlocked] = useState<BlockedRow[]>([]);
   const [waitlist, setWaitlist] = useState<WaitlistRow[]>([]);
   const [engagement, setEngagement] = useState<any>(null);
+  const [dailyTrend, setDailyTrend] = useState<any[]>([]);
+  const today = new Date().toISOString().slice(0, 10);
+  const monthAgo = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
+  const [exportFrom, setExportFrom] = useState(monthAgo);
+  const [exportTo, setExportTo] = useState(today);
 
   // settings
   const [banner, setBanner] = useState({ enabled: false, message: "", variant: "info" });
@@ -84,7 +90,7 @@ export default function Admin() {
   }, [user, authLoading]);
 
   const loadAll = async () => {
-    const [statsRes, usersRes, convRes, subRes, auditRes, b, w, settings, engRes] = await Promise.all([
+    const [statsRes, usersRes, convRes, subRes, auditRes, b, w, settings, engRes, trendRes] = await Promise.all([
       supabase.rpc("admin_get_stats"),
       supabase.rpc("admin_list_users", { _limit: 100, _offset: 0, _search: "" }),
       supabase.rpc("admin_list_conversations", { _limit: 100, _offset: 0 }),
@@ -94,6 +100,7 @@ export default function Admin() {
       supabase.from("edu_pro_waitlist").select("*").order("created_at", { ascending: false }).limit(200),
       supabase.from("app_settings").select("*"),
       supabase.rpc("admin_feature_usage_stats", { _days: 30, _limit: 100 }),
+      supabase.rpc("admin_daily_feature_usage" as any, { _days: 7 }),
     ]);
     if (statsRes.data) setStats(statsRes.data);
     if (usersRes.data && (usersRes.data as any).users) setUsers((usersRes.data as any).users);
@@ -103,6 +110,7 @@ export default function Admin() {
     if (b.data) setBlocked(b.data as BlockedRow[]);
     if (w.data) setWaitlist(w.data as WaitlistRow[]);
     if (engRes.data) setEngagement(engRes.data);
+    if (trendRes.data) setDailyTrend(trendRes.data as any[]);
     if (settings.data) {
       for (const row of settings.data as any[]) {
         if (row.key === "broadcast_banner") setBanner(row.value);
@@ -172,6 +180,55 @@ export default function Admin() {
   const deleteWaitlist = async (id: string) => {
     await supabase.from("edu_pro_waitlist").delete().eq("id", id);
     setWaitlist((p) => p.filter((r) => r.id !== id));
+  };
+
+  // Derived: top first-aid sections + top health-tool actions
+  const topFirstAidSections = useMemo(() => {
+    const items = (engagement?.by_item || []).filter((i: any) => i.feature === "first_aid_section" || i.feature === "first_aid");
+    const map = new Map<string, number>();
+    items.forEach((i: any) => map.set(i.item_key, (map.get(i.item_key) || 0) + Number(i.count || 0)));
+    return Array.from(map.entries()).map(([item_key, count]) => ({ item_key, count })).sort((a, b) => b.count - a.count).slice(0, 10);
+  }, [engagement]);
+
+  const topHealthToolActions = useMemo(() => {
+    return (engagement?.by_item || []).filter((i: any) => i.feature === "health_tool_action" || i.feature === "health_tool")
+      .sort((a: any, b: any) => b.count - a.count).slice(0, 10);
+  }, [engagement]);
+
+  const downloadFile = (content: string, filename: string, mime: string) => {
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const toCsv = (rows: any[]) => {
+    if (!rows || rows.length === 0) return "";
+    const headers = Array.from(new Set(rows.flatMap((r) => Object.keys(r))));
+    const escape = (v: any) => {
+      if (v === null || v === undefined) return "";
+      const s = typeof v === "object" ? JSON.stringify(v) : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    return [headers.join(","), ...rows.map((r) => headers.map((h) => escape(r[h])).join(","))].join("\n");
+  };
+
+  const exportData = async (kind: "engagement" | "users", format: "csv" | "json") => {
+    const fromTs = new Date(exportFrom + "T00:00:00").toISOString();
+    const toTs = new Date(exportTo + "T23:59:59.999").toISOString();
+    const rpc = kind === "engagement"
+      ? supabase.rpc("admin_export_feature_usage" as any, { _from: fromTs, _to: toTs, _feature: "" })
+      : supabase.rpc("admin_export_users" as any, { _from: fromTs, _to: toTs });
+    const { data, error } = await rpc;
+    if (error) return toast.error(error.message);
+    const rows: any[] = (data as any[]) || [];
+    if (rows.length === 0) return toast.info("No rows in selected range");
+    const filename = `${kind}-${exportFrom}-to-${exportTo}.${format}`;
+    if (format === "json") downloadFile(JSON.stringify(rows, null, 2), filename, "application/json");
+    else downloadFile(toCsv(rows), filename, "text/csv");
+    toast.success(`Exported ${rows.length} rows`);
   };
 
   if (authLoading || checking) {
@@ -497,10 +554,108 @@ export default function Admin() {
           {/* ENGAGEMENT */}
           <TabsContent value="engagement" className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <StatCard icon={<Activity size={18} />} label="First Aid views (30d)" value={engagement?.totals?.first_aid ?? 0} />
-              <StatCard icon={<Activity size={18} />} label="Health Tool uses (30d)" value={engagement?.totals?.health_tool ?? 0} />
-              <StatCard icon={<Activity size={18} />} label="Library opens (30d)" value={engagement?.totals?.library ?? 0} />
+              <StatCard icon={<Activity size={18} />} label="First Aid events (30d)" value={
+                ((engagement?.totals?.first_aid ?? 0) as number) + ((engagement?.totals?.first_aid_section ?? 0) as number)
+              } />
+              <StatCard icon={<Activity size={18} />} label="Health Tool events (30d)" value={
+                ((engagement?.totals?.health_tool ?? 0) as number) + ((engagement?.totals?.health_tool_action ?? 0) as number)
+              } />
+              <StatCard icon={<Activity size={18} />} label="Library events (30d)" value={
+                ((engagement?.totals?.library ?? 0) as number)
+                + ((engagement?.totals?.library_dwell ?? 0) as number)
+                + ((engagement?.totals?.library_chat_start ?? 0) as number)
+              } />
             </div>
+
+            {/* Export */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg"><Download size={18} className="text-primary" /> Export analytics</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <Label>From</Label>
+                    <Input type="date" value={exportFrom} onChange={(e) => setExportFrom(e.target.value)} />
+                  </div>
+                  <div>
+                    <Label>To</Label>
+                    <Input type="date" value={exportTo} onChange={(e) => setExportTo(e.target.value)} />
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button size="sm" variant="outline" onClick={() => exportData("engagement", "csv")}><Download size={14} /> Engagement CSV</Button>
+                  <Button size="sm" variant="outline" onClick={() => exportData("engagement", "json")}><Download size={14} /> Engagement JSON</Button>
+                  <Button size="sm" variant="outline" onClick={() => exportData("users", "csv")}><Download size={14} /> Users CSV</Button>
+                  <Button size="sm" variant="outline" onClick={() => exportData("users", "json")}><Download size={14} /> Users JSON</Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* 7-day daily trend */}
+            <Card>
+              <CardHeader><CardTitle className="text-lg">Daily trend (7 days)</CardTitle></CardHeader>
+              <CardContent>
+                <div className="h-64 w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={dailyTrend.map((d) => ({ ...d, date: new Date(d.date).toLocaleDateString(undefined, { month: "short", day: "numeric" }) }))}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                      <XAxis dataKey="date" className="text-xs" />
+                      <YAxis className="text-xs" allowDecimals={false} />
+                      <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8 }} />
+                      <Legend />
+                      <Line type="monotone" dataKey="first_aid" stroke="hsl(var(--destructive))" strokeWidth={2} name="First Aid" />
+                      <Line type="monotone" dataKey="health_tool" stroke="hsl(var(--primary))" strokeWidth={2} name="Health Tools" />
+                      <Line type="monotone" dataKey="library" stroke="hsl(var(--accent-foreground))" strokeWidth={2} name="Library" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Top First Aid sections */}
+            <Card>
+              <CardHeader><CardTitle className="text-lg">Top First Aid guides (30 days)</CardTitle></CardHeader>
+              <CardContent className="p-0">
+                {topFirstAidSections.length === 0 ? (
+                  <p className="p-6 text-sm text-muted-foreground">No First Aid views yet.</p>
+                ) : (
+                  <Table>
+                    <TableHeader><TableRow><TableHead>Guide</TableHead><TableHead className="text-right">Opens</TableHead></TableRow></TableHeader>
+                    <TableBody>
+                      {topFirstAidSections.map((i, idx) => (
+                        <TableRow key={idx}>
+                          <TableCell className="text-sm">{i.item_key}</TableCell>
+                          <TableCell className="text-right font-medium">{i.count}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Top Health Tool actions */}
+            <Card>
+              <CardHeader><CardTitle className="text-lg">Health Tools usage (30 days)</CardTitle></CardHeader>
+              <CardContent className="p-0">
+                {topHealthToolActions.length === 0 ? (
+                  <p className="p-6 text-sm text-muted-foreground">No health tool activity yet.</p>
+                ) : (
+                  <Table>
+                    <TableHeader><TableRow><TableHead>Tool</TableHead><TableHead className="text-right">Events</TableHead></TableRow></TableHeader>
+                    <TableBody>
+                      {topHealthToolActions.map((i: any, idx: number) => (
+                        <TableRow key={idx}>
+                          <TableCell className="text-sm">{i.item_key}</TableCell>
+                          <TableCell className="text-right font-medium">{i.count}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
 
             <Card>
               <CardHeader><CardTitle className="text-lg">Top items (30 days)</CardTitle></CardHeader>

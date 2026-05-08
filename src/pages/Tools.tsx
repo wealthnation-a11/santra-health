@@ -13,6 +13,11 @@ function BMICalculator() {
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const bmi = height && weight ? (parseFloat(weight) / ((parseFloat(height) / 100) ** 2)) : null;
+  useEffect(() => {
+    if (bmi && bmi > 0 && bmi < 100) {
+      trackUsage("health_tool_action", "bmi", { action: "calculate", value: Number(bmi.toFixed(1)) });
+    }
+  }, [bmi]);
   const getCategory = (bmi: number) => {
     if (bmi < 18.5) return { label: "Underweight", color: "text-blue-500" };
     if (bmi < 25) return { label: "Normal", color: "text-primary" };

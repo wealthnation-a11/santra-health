@@ -1,6 +1,13 @@
 import { supabase } from "@/integrations/supabase/client";
 
-export type FeatureName = "first_aid" | "health_tool" | "library";
+export type FeatureName =
+  | "first_aid"
+  | "first_aid_section"
+  | "health_tool"
+  | "health_tool_action"
+  | "library"
+  | "library_dwell"
+  | "library_chat_start";
 
 export async function trackUsage(
   feature: FeatureName,

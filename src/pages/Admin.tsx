@@ -110,6 +110,7 @@ export default function Admin() {
     if (b.data) setBlocked(b.data as BlockedRow[]);
     if (w.data) setWaitlist(w.data as WaitlistRow[]);
     if (engRes.data) setEngagement(engRes.data);
+    if (trendRes.data) setDailyTrend(trendRes.data as any[]);
     if (settings.data) {
       for (const row of settings.data as any[]) {
         if (row.key === "broadcast_banner") setBanner(row.value);

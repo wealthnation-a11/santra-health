@@ -63,6 +63,11 @@ export default function Admin() {
   const [blocked, setBlocked] = useState<BlockedRow[]>([]);
   const [waitlist, setWaitlist] = useState<WaitlistRow[]>([]);
   const [engagement, setEngagement] = useState<any>(null);
+  const [dailyTrend, setDailyTrend] = useState<any[]>([]);
+  const today = new Date().toISOString().slice(0, 10);
+  const monthAgo = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
+  const [exportFrom, setExportFrom] = useState(monthAgo);
+  const [exportTo, setExportTo] = useState(today);
 
   // settings
   const [banner, setBanner] = useState({ enabled: false, message: "", variant: "info" });

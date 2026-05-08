@@ -100,6 +100,11 @@ function CalorieEstimator() {
       : 10 * parseFloat(weight) + 6.25 * parseFloat(height) - 5 * parseFloat(age) - 161
     : null;
   const tdee = bmr ? bmr * parseFloat(activity) : null;
+  useEffect(() => {
+    if (tdee && tdee > 0) {
+      trackUsage("health_tool_action", "calories", { action: "calculate", value: Math.round(tdee) });
+    }
+  }, [tdee]);
 
   return (
     <div className="space-y-4">

@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Shield, Mail, Ban, Trash2, Users, MessageSquare,
   CreditCard, Settings as SettingsIcon, Activity, Megaphone, Wrench,
-  ToggleLeft, UserCog, Search, ShieldCheck, ShieldOff, BarChart3,
+  ToggleLeft, UserCog, Search, ShieldCheck, ShieldOff, BarChart3, Download,
 } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, CartesianGrid } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

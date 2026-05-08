@@ -53,6 +53,11 @@ function WaterIntakeCalculator() {
   const [activity, setActivity] = useState("moderate");
   const multiplier = activity === "low" ? 30 : activity === "moderate" ? 35 : 40;
   const intake = weight ? ((parseFloat(weight) * multiplier) / 1000) : null;
+  useEffect(() => {
+    if (intake && intake > 0) {
+      trackUsage("health_tool_action", "water", { action: "calculate", value: Number(intake.toFixed(1)) });
+    }
+  }, [intake]);
 
   return (
     <div className="space-y-4">

@@ -384,14 +384,17 @@ export type Database = {
       }
       profiles: {
         Row: {
+          admin_notes: string | null
           ban_reason: string | null
           banned_at: string | null
           country: string | null
           created_at: string
+          daily_message_limit_override: number | null
           date_of_birth: string | null
           full_name: string | null
           gender: string | null
           id: string
+          monthly_voice_limit_override: number | null
           onboarding_completed: boolean
           phone: string | null
           preferred_language: string | null
@@ -401,14 +404,17 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          admin_notes?: string | null
           ban_reason?: string | null
           banned_at?: string | null
           country?: string | null
           created_at?: string
+          daily_message_limit_override?: number | null
           date_of_birth?: string | null
           full_name?: string | null
           gender?: string | null
           id: string
+          monthly_voice_limit_override?: number | null
           onboarding_completed?: boolean
           phone?: string | null
           preferred_language?: string | null
@@ -418,14 +424,17 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          admin_notes?: string | null
           ban_reason?: string | null
           banned_at?: string | null
           country?: string | null
           created_at?: string
+          daily_message_limit_override?: number | null
           date_of_birth?: string | null
           full_name?: string | null
           gender?: string | null
           id?: string
+          monthly_voice_limit_override?: number | null
           onboarding_completed?: boolean
           phone?: string | null
           preferred_language?: string | null
@@ -625,6 +634,19 @@ export type Database = {
         Args: { _limit?: number; _offset?: number; _search?: string }
         Returns: Json
       }
+      admin_list_users_v2: {
+        Args: {
+          _country?: string
+          _limit?: number
+          _offset?: number
+          _plan?: string
+          _search?: string
+          _sort?: string
+          _sort_dir?: string
+          _status?: string
+        }
+        Returns: Json
+      }
       admin_revoke_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -645,8 +667,31 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_set_user_limits: {
+        Args: {
+          _daily_messages: number
+          _monthly_voice: number
+          _user_id: string
+        }
+        Returns: undefined
+      }
       admin_top_countries: { Args: { _limit?: number }; Returns: Json }
       admin_unban_user: { Args: { _user_id: string }; Returns: undefined }
+      admin_update_profile: {
+        Args: {
+          _admin_notes?: string
+          _country?: string
+          _full_name?: string
+          _gender?: string
+          _phone?: string
+          _preferred_language?: string
+          _state?: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
+      admin_user_countries: { Args: never; Returns: Json }
+      admin_user_detail: { Args: { _user_id: string }; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

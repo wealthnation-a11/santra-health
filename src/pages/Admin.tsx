@@ -21,6 +21,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { SantraLogo } from "@/components/SantraLogo";
+import { AdminUsersTab } from "@/components/admin/AdminUsersTab";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -292,59 +293,9 @@ export default function Admin() {
 
           {/* USERS */}
           <TabsContent value="users">
-            <Card>
-              <CardHeader>
-                <div className="flex gap-2 items-center">
-                  <div className="relative flex-1 max-w-sm">
-                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                    <Input placeholder="Search by name…" value={userSearch}
-                      onChange={(e) => setUserSearch(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && searchUsers()} className="pl-9" />
-                  </div>
-                  <Button size="sm" onClick={searchUsers}>Search</Button>
-                </div>
-              </CardHeader>
-              <CardContent className="p-0">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Country</TableHead>
-                      <TableHead>Plans</TableHead>
-                      <TableHead>Joined</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users.map((u) => (
-                      <TableRow key={u.id}>
-                        <TableCell className="font-medium">{u.full_name || "—"}</TableCell>
-                        <TableCell className="text-sm text-muted-foreground">{u.country || "—"}</TableCell>
-                        <TableCell className="text-xs">
-                          {u.subscriptions?.map((s, i) => (
-                            <Badge key={i} variant="secondary" className="mr-1">{s.plan_type}:{s.plan}</Badge>
-                          )) || "—"}
-                        </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">{new Date(u.created_at).toLocaleDateString()}</TableCell>
-                        <TableCell>
-                          {u.banned_at ? <Badge variant="destructive">Banned</Badge> : <Badge variant="outline">Active</Badge>}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <UserActions
-                            user={u}
-                            onBan={banUser} onUnban={unbanUser}
-                            onGrantAdmin={grantAdmin} onRevokeAdmin={revokeAdmin}
-                            onSetSub={setSubPlan}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
+            <AdminUsersTab />
           </TabsContent>
+
 
           {/* CONVERSATIONS */}
           <TabsContent value="conversations">

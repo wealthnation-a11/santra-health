@@ -436,6 +436,16 @@ function UserDetailDrawer({
             {/* Account actions */}
             <Section title="Account actions">
               <div className="flex flex-wrap gap-2">
+                {(() => {
+                  const targetEmail = user.email || detail?.email;
+                  return targetEmail ? (
+                    <Button size="sm" variant="outline" asChild>
+                      <a href={`mailto:${targetEmail}`} target="_blank" rel="noopener noreferrer">
+                        <Mail size={14} className="mr-1" /> Email user
+                      </a>
+                    </Button>
+                  ) : null;
+                })()}
                 <Button size="sm" variant="outline" onClick={passwordReset} disabled={busy === "send_password_reset"}>
                   <KeyRound size={14} className="mr-1" /> Password reset link
                 </Button>

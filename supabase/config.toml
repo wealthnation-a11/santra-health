@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.interpret-lab]
 verify_jwt = false
+
+[functions.log-blocked-signup]
+verify_jwt = false

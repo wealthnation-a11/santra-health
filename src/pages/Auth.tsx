@@ -53,10 +53,9 @@ export default function Auth() {
     if (!isValidEmail(email)) {
       const value = email.trim().toLowerCase();
       const domain = value.includes("@") ? value.split("@")[1] : "invalid";
-      // Fire-and-forget log of blocked attempt for admin review
-      void supabase.from("blocked_signups").insert({
-        email: value,
-        reason: `Disallowed email domain: ${domain}`,
+      // Fire-and-forget log of blocked attempt for admin review (via edge function)
+      void supabase.functions.invoke("log-blocked-signup", {
+        body: { email: value, reason: `Disallowed email domain: ${domain}` },
       });
       toast({ title: "Invalid email", description: "Please put in a correct email address (Gmail, Yahoo, Outlook, or a custom domain).", variant: "destructive" });
       return;

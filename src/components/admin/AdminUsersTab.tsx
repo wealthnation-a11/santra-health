@@ -22,6 +22,7 @@ import {
 interface UserRow {
   id: string;
   full_name: string | null;
+  email?: string | null;
   country: string | null;
   signup_country?: string | null;
   state?: string | null;

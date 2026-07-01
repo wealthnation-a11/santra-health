@@ -38,14 +38,14 @@ function shouldFail(error: unknown, label: string) {
 }
 
 // ---------- blocked_signups ----------
-Deno.test("anon cannot INSERT into blocked_signups", async () => {
+Deno.test({ name: "anon cannot INSERT into blocked_signups", sanitizeOps: false, sanitizeResources: false, fn: async () => {
   const { error } = await anon()
     .from("blocked_signups")
     .insert({ email: "rls-anon@example.com", reason: "smoke test" });
   shouldFail(error, "anon blocked_signups insert");
-});
+} });
 
-Deno.test("anon cannot SELECT from blocked_signups", async () => {
+Deno.test({ name: "anon cannot SELECT from blocked_signups", sanitizeOps: false, sanitizeResources: false, fn: async () => {
   const { data, error } = await anon()
     .from("blocked_signups")
     .select("id")
@@ -53,18 +53,18 @@ Deno.test("anon cannot SELECT from blocked_signups", async () => {
   // Either an error or an empty result (RLS filters everything out).
   assert(error || (Array.isArray(data) && data.length === 0),
     "anon should not see blocked_signups rows");
-});
+} });
 
-Deno.test("authenticated non-admin cannot INSERT into blocked_signups", async () => {
+Deno.test({ name: "authenticated non-admin cannot INSERT into blocked_signups", sanitizeOps: false, sanitizeResources: false, fn: async () => {
   const { client } = await makeAuthedClient();
   const { error } = await client
     .from("blocked_signups")
     .insert({ email: "rls-authed@example.com", reason: "smoke test" });
   shouldFail(error, "authed blocked_signups insert");
-});
+} });
 
 // ---------- subscriptions ----------
-Deno.test("authenticated user cannot self-INSERT a subscription", async () => {
+Deno.test({ name: "authenticated user cannot self-INSERT a subscription", sanitizeOps: false, sanitizeResources: false, fn: async () => {
   const { client, userId } = await makeAuthedClient();
   const { error } = await client.from("subscriptions").insert({
     user_id: userId,
@@ -73,9 +73,9 @@ Deno.test("authenticated user cannot self-INSERT a subscription", async () => {
     status: "active",
   });
   shouldFail(error, "user subscription insert");
-});
+} });
 
-Deno.test("authenticated user cannot UPDATE any subscription row", async () => {
+Deno.test({ name: "authenticated user cannot UPDATE any subscription row", sanitizeOps: false, sanitizeResources: false, fn: async () => {
   const { client, userId } = await makeAuthedClient();
   const { data, error } = await client
     .from("subscriptions")
@@ -85,10 +85,10 @@ Deno.test("authenticated user cannot UPDATE any subscription row", async () => {
   // Either error or 0 rows updated (no INSERT allowed either, so 0 rows is expected).
   assert(error || (Array.isArray(data) && data.length === 0),
     "user should not be able to update subscriptions");
-});
+} });
 
 // ---------- profiles admin-only fields ----------
-Deno.test("authenticated user cannot escalate admin-only profile fields", async () => {
+Deno.test({ name: "authenticated user cannot escalate admin-only profile fields", sanitizeOps: false, sanitizeResources: false, fn: async () => {
   const { client, userId } = await makeAuthedClient();
   // The trigger silently reverts admin-only fields to the OLD values.
   await client
@@ -124,9 +124,9 @@ Deno.test("authenticated user cannot escalate admin-only profile fields", async 
   );
   assertEquals(data!.admin_notes, null, "admin_notes should not be user-writable");
   assertEquals(data!.ban_reason, null, "ban_reason should not be user-writable");
-});
+} });
 
-Deno.test("authenticated user cannot UPDATE another user's profile", async () => {
+Deno.test({ name: "authenticated user cannot UPDATE another user's profile", sanitizeOps: false, sanitizeResources: false, fn: async () => {
   const a = await makeAuthedClient();
   const b = await makeAuthedClient();
   const { data, error } = await a.client
@@ -136,10 +136,10 @@ Deno.test("authenticated user cannot UPDATE another user's profile", async () =>
     .select();
   assert(error || (Array.isArray(data) && data.length === 0),
     "user A must not be able to update user B's profile");
-});
+} });
 
 // ---------- daily_message_usage / voice_usage ----------
-Deno.test("authenticated user cannot manipulate daily_message_usage count arbitrarily", async () => {
+Deno.test({ name: "authenticated user cannot manipulate daily_message_usage count arbitrarily", sanitizeOps: false, sanitizeResources: false, fn: async () => {
   const { client, userId } = await makeAuthedClient();
   // Attempt to reset to 0 (bypass daily limits). RLS may allow the write but the
   // scanner flag is about unrestricted column control — record whichever behavior
@@ -156,9 +156,9 @@ Deno.test("authenticated user cannot manipulate daily_message_usage count arbitr
     "daily_message_usage self-write status:",
     error ? `blocked (${error.message})` : "allowed",
   );
-});
+} });
 
-Deno.test("authenticated user cannot manipulate voice_usage count arbitrarily", async () => {
+Deno.test({ name: "authenticated user cannot manipulate voice_usage count arbitrarily", sanitizeOps: false, sanitizeResources: false, fn: async () => {
   const { client, userId } = await makeAuthedClient();
   const { error } = await client.from("voice_usage").upsert({
     user_id: userId,
@@ -169,26 +169,26 @@ Deno.test("authenticated user cannot manipulate voice_usage count arbitrarily", 
     "voice_usage self-write status:",
     error ? `blocked (${error.message})` : "allowed",
   );
-});
+} });
 
 // ---------- storage: lab-uploads bucket ----------
-Deno.test("anon cannot upload to lab-uploads bucket", async () => {
+Deno.test({ name: "anon cannot upload to lab-uploads bucket", sanitizeOps: false, sanitizeResources: false, fn: async () => {
   const { error } = await anon()
     .storage.from("lab-uploads")
     .upload(`anon/${crypto.randomUUID()}.txt`, new Blob(["x"]));
   shouldFail(error, "anon lab-uploads upload");
-});
+} });
 
-Deno.test("authenticated user cannot upload outside their own folder", async () => {
+Deno.test({ name: "authenticated user cannot upload outside their own folder", sanitizeOps: false, sanitizeResources: false, fn: async () => {
   const { client } = await makeAuthedClient();
   const otherUser = crypto.randomUUID();
   const { error } = await client
     .storage.from("lab-uploads")
     .upload(`${otherUser}/${crypto.randomUUID()}.txt`, new Blob(["x"]));
   shouldFail(error, "cross-user lab-uploads upload");
-});
+} });
 
-Deno.test("authenticated user CAN upload into their own folder", async () => {
+Deno.test({ name: "authenticated user CAN upload into their own folder", sanitizeOps: false, sanitizeResources: false, fn: async () => {
   const { client, userId } = await makeAuthedClient();
   const path = `${userId}/${crypto.randomUUID()}.txt`;
   const { error } = await client
@@ -197,4 +197,4 @@ Deno.test("authenticated user CAN upload into their own folder", async () => {
   assertEquals(error, null, "owner should be able to upload to own folder");
   // cleanup best-effort
   await client.storage.from("lab-uploads").remove([path]);
-});
+} });

@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.log-blocked-signup]
 verify_jwt = false
+
+[functions.lab-api]
+verify_jwt = false

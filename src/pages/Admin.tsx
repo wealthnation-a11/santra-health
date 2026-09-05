@@ -287,6 +287,7 @@ export default function Admin() {
             <TabsTrigger value="blocked" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><Ban size={14} className="mr-2" /> Blocked</TabsTrigger>
             <TabsTrigger value="waitlist" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><Mail size={14} className="mr-2" /> Waitlist</TabsTrigger>
             <TabsTrigger value="audit" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><Activity size={14} className="mr-2" /> Audit log</TabsTrigger>
+            <TabsTrigger value="labapi" className="w-full justify-start data-[state=active]:bg-primary/10 data-[state=active]:text-primary"><Wrench size={14} className="mr-2" /> Lab API</TabsTrigger>
           </TabsList>
           <div className="flex-1 min-w-0 space-y-4">
 

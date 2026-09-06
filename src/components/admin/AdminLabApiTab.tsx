@@ -64,7 +64,7 @@ export function AdminLabApiTab() {
       toast.error("Give the key a name");
       return;
     }
-    const { data, error } = await supabase.rpc("admin_create_lab_api_key", {
+    const { data, error } = await (supabase as any).rpc("admin_create_lab_api_key", {
       p_name: newName.trim(),
       p_daily_limit: newLimit,
     });

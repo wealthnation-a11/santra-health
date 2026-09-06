@@ -709,6 +709,11 @@ export default function Admin() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* LAB API */}
+          <TabsContent value="labapi">
+            <AdminLabApiTab />
+          </TabsContent>
           </div>
         </Tabs>
       </main>

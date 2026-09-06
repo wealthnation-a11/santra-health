@@ -43,14 +43,15 @@ export function AdminLabApiTab() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    const rpc = (supabase as any).rpc.bind(supabase);
     const [{ data: keyList, error: ke }, { data: statList, error: se }] = await Promise.all([
-      supabase.rpc("admin_list_lab_api_keys"),
-      supabase.rpc("admin_lab_api_usage_stats", { p_days: days }),
+      rpc("admin_list_lab_api_keys"),
+      rpc("admin_lab_api_usage_stats", { p_days: days }),
     ]);
     if (ke) toast.error(ke.message);
     if (se) toast.error(se.message);
-    setKeys((keyList as ApiKey[]) || []);
-    setStats((statList as UsageStat[]) || []);
+    setKeys((keyList as unknown as ApiKey[]) || []);
+    setStats((statList as unknown as UsageStat[]) || []);
     setLoading(false);
   }, [days]);
 
@@ -63,7 +64,7 @@ export function AdminLabApiTab() {
       toast.error("Give the key a name");
       return;
     }
-    const { data, error } = await supabase.rpc("admin_create_lab_api_key", {
+    const { data, error } = await (supabase as any).rpc("admin_create_lab_api_key", {
       p_name: newName.trim(),
       p_daily_limit: newLimit,
     });
@@ -79,14 +80,14 @@ export function AdminLabApiTab() {
   };
 
   const revoke = async (id: string) => {
-    const { error } = await supabase.rpc("admin_revoke_lab_api_key", { p_id: id });
+    const { error } = await (supabase as any).rpc("admin_revoke_lab_api_key", { p_id: id });
     if (error) return toast.error(error.message);
     toast.success("Key revoked");
     load();
   };
 
   const restore = async (id: string) => {
-    const { error } = await supabase.rpc("admin_restore_lab_api_key", { p_id: id });
+    const { error } = await (supabase as any).rpc("admin_restore_lab_api_key", { p_id: id });
     if (error) return toast.error(error.message);
     toast.success("Key restored");
     load();

@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { SantraLogo } from "@/components/SantraLogo";
 import { AdminUsersTab } from "@/components/admin/AdminUsersTab";
+import { AdminLabApiTab } from "@/components/admin/AdminLabApiTab";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";

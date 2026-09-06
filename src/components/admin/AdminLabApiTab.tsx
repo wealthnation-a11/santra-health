@@ -80,14 +80,14 @@ export function AdminLabApiTab() {
   };
 
   const revoke = async (id: string) => {
-    const { error } = await supabase.rpc("admin_revoke_lab_api_key", { p_id: id });
+    const { error } = await (supabase as any).rpc("admin_revoke_lab_api_key", { p_id: id });
     if (error) return toast.error(error.message);
     toast.success("Key revoked");
     load();
   };
 
   const restore = async (id: string) => {
-    const { error } = await supabase.rpc("admin_restore_lab_api_key", { p_id: id });
+    const { error } = await (supabase as any).rpc("admin_restore_lab_api_key", { p_id: id });
     if (error) return toast.error(error.message);
     toast.success("Key restored");
     load();

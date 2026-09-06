@@ -43,14 +43,15 @@ export function AdminLabApiTab() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    const rpc = (supabase as any).rpc.bind(supabase);
     const [{ data: keyList, error: ke }, { data: statList, error: se }] = await Promise.all([
-      supabase.rpc("admin_list_lab_api_keys"),
-      supabase.rpc("admin_lab_api_usage_stats", { p_days: days }),
+      rpc("admin_list_lab_api_keys"),
+      rpc("admin_lab_api_usage_stats", { p_days: days }),
     ]);
     if (ke) toast.error(ke.message);
     if (se) toast.error(se.message);
-    setKeys((keyList as ApiKey[]) || []);
-    setStats((statList as UsageStat[]) || []);
+    setKeys((keyList as unknown as ApiKey[]) || []);
+    setStats((statList as unknown as UsageStat[]) || []);
     setLoading(false);
   }, [days]);
 

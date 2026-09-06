@@ -266,6 +266,77 @@ export type Database = {
         }
         Relationships: []
       }
+      lab_api_keys: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          daily_limit: number
+          id: string
+          is_active: boolean
+          key_hash: string
+          key_prefix: string
+          last_used_at: string | null
+          name: string
+          total_requests: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          daily_limit?: number
+          id?: string
+          is_active?: boolean
+          key_hash: string
+          key_prefix: string
+          last_used_at?: string | null
+          name: string
+          total_requests?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          daily_limit?: number
+          id?: string
+          is_active?: boolean
+          key_hash?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          name?: string
+          total_requests?: number
+        }
+        Relationships: []
+      }
+      lab_api_usage: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          key_id: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          key_id?: string | null
+          status: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          key_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lab_api_usage_key_id_fkey"
+            columns: ["key_id"]
+            isOneToOne: false
+            referencedRelation: "lab_api_keys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       message_feedback: {
         Row: {
           created_at: string
@@ -589,6 +660,10 @@ export type Database = {
         Args: { _reason?: string; _user_id: string }
         Returns: undefined
       }
+      admin_create_lab_api_key: {
+        Args: { p_daily_limit?: number; p_name: string }
+        Returns: string
+      }
       admin_daily_feature_usage: { Args: { _days?: number }; Returns: Json }
       admin_daily_messages: { Args: { _days?: number }; Returns: Json }
       admin_daily_signups: { Args: { _days?: number }; Returns: Json }
@@ -616,10 +691,35 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_lab_api_usage_stats: {
+        Args: { p_days?: number }
+        Returns: {
+          error_calls: number
+          key_prefix: string
+          last_used_at: string
+          name: string
+          success_calls: number
+          total_calls: number
+        }[]
+      }
       admin_list_audit_log: { Args: { _limit?: number }; Returns: Json }
       admin_list_conversations: {
         Args: { _limit?: number; _offset?: number }
         Returns: Json
+      }
+      admin_list_lab_api_keys: {
+        Args: never
+        Returns: {
+          created_at: string
+          created_by: string
+          daily_limit: number
+          id: string
+          is_active: boolean
+          key_prefix: string
+          last_used_at: string
+          name: string
+          total_requests: number
+        }[]
       }
       admin_list_subscriptions: {
         Args: {
@@ -647,6 +747,8 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_restore_lab_api_key: { Args: { p_id: string }; Returns: undefined }
+      admin_revoke_lab_api_key: { Args: { p_id: string }; Returns: undefined }
       admin_revoke_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

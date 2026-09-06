@@ -42,14 +42,13 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
     const { data: claims, error: claimsError } = await authClient.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    if (claimsError || !claims?.claims) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    let claimsData: { claims: { sub: string } } = claims as any;
-    const userId = claimsData.claims.sub;
+    const userId = claims.claims.sub;
 
     const serviceClient = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
     if (!(await isAdmin(authClient, userId))) {

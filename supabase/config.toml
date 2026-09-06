@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.lab-api]
 verify_jwt = false
+
+[functions.lab-api-admin]
+verify_jwt = false

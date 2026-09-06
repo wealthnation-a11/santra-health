@@ -31,6 +31,15 @@ interface UsageStat {
 
 const ENDPOINT = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lab-api`;
 
+async function callAdmin(action: string, payload: Record<string, unknown> = {}) {
+  const { data, error } = await supabase.functions.invoke("lab-api-admin", {
+    body: { action, ...payload },
+  });
+  if (error) throw error;
+  if (data?.error) throw new Error(data.error);
+  return data;
+}
+
 export function AdminLabApiTab() {
   const [keys, setKeys] = useState<ApiKey[]>([]);
   const [stats, setStats] = useState<UsageStat[]>([]);
@@ -43,16 +52,18 @@ export function AdminLabApiTab() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const rpc = (supabase as any).rpc.bind(supabase);
-    const [{ data: keyList, error: ke }, { data: statList, error: se }] = await Promise.all([
-      rpc("admin_list_lab_api_keys"),
-      rpc("admin_lab_api_usage_stats", { p_days: days }),
-    ]);
-    if (ke) toast.error(ke.message);
-    if (se) toast.error(se.message);
-    setKeys((keyList as unknown as ApiKey[]) || []);
-    setStats((statList as unknown as UsageStat[]) || []);
-    setLoading(false);
+    try {
+      const [listRes, statsRes] = await Promise.all([
+        callAdmin("list"),
+        callAdmin("stats", { days }),
+      ]);
+      setKeys((listRes.keys as ApiKey[]) || []);
+      setStats((statsRes.stats as UsageStat[]) || []);
+    } catch (e: any) {
+      toast.error(e.message || "Failed to load API keys");
+    } finally {
+      setLoading(false);
+    }
   }, [days]);
 
   useEffect(() => {
@@ -64,33 +75,36 @@ export function AdminLabApiTab() {
       toast.error("Give the key a name");
       return;
     }
-    const { data, error } = await (supabase as any).rpc("admin_create_lab_api_key", {
-      p_name: newName.trim(),
-      p_daily_limit: newLimit,
-    });
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      const res = await callAdmin("create", { name: newName.trim(), daily_limit: newLimit });
+      setCreatedKey(res.key as string);
+      setNewName("");
+      setNewLimit(100);
+      toast.success("API key created — copy it now, it won't be shown again.");
+      load();
+    } catch (e: any) {
+      toast.error(e.message || "Failed to create key");
     }
-    setCreatedKey(data as string);
-    setNewName("");
-    setNewLimit(100);
-    toast.success("API key created — copy it now, it won't be shown again.");
-    load();
   };
 
   const revoke = async (id: string) => {
-    const { error } = await (supabase as any).rpc("admin_revoke_lab_api_key", { p_id: id });
-    if (error) return toast.error(error.message);
-    toast.success("Key revoked");
-    load();
+    try {
+      await callAdmin("revoke", { id });
+      toast.success("Key revoked");
+      load();
+    } catch (e: any) {
+      toast.error(e.message);
+    }
   };
 
   const restore = async (id: string) => {
-    const { error } = await (supabase as any).rpc("admin_restore_lab_api_key", { p_id: id });
-    if (error) return toast.error(error.message);
-    toast.success("Key restored");
-    load();
+    try {
+      await callAdmin("restore", { id });
+      toast.success("Key restored");
+      load();
+    } catch (e: any) {
+      toast.error(e.message);
+    }
   };
 
   const copy = (text: string) => {

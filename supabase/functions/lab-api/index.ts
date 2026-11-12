@@ -40,14 +40,13 @@ async function logUsage(
   errorMessage?: string
 ) {
   try {
-    await serviceClient.from("lab_api_usage").insert({
+    const { error: insertError } = await serviceClient.from("lab_api_usage").insert({
       key_id: keyId,
       status,
       error_message: errorMessage || null,
     });
-    await serviceClient
-      .from("lab_api_keys")
-      .update({ last_used_at: new Date().toISOString(), total_requests: "increment" })
+    if (insertError) throw insertError;
+    await serviceClient.rpc("increment_lab_api_key_usage", { p_key_id: keyId })
       .eq("id", keyId);
   } catch (e) {
     console.error("Usage log error:", e);

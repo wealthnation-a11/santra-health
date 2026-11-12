@@ -141,21 +141,12 @@ Deno.test({ name: "authenticated user cannot UPDATE another user's profile", san
 // ---------- daily_message_usage / voice_usage ----------
 Deno.test({ name: "authenticated user cannot manipulate daily_message_usage count arbitrarily", sanitizeOps: false, sanitizeResources: false, fn: async () => {
   const { client, userId } = await makeAuthedClient();
-  // Attempt to reset to 0 (bypass daily limits). RLS may allow the write but the
-  // scanner flag is about unrestricted column control — record whichever behavior
-  // is currently in place so regressions are visible.
   const { error } = await client.from("daily_message_usage").upsert({
     user_id: userId,
     usage_date: new Date().toISOString().slice(0, 10),
     message_count: 0,
   });
-  // We currently permit self-writes; this assertion documents the status quo so
-  // that tightening the policy later flips this test intentionally.
-  // If/when the policy is locked down, replace this with `shouldFail(error, ...)`.
-  console.warn(
-    "daily_message_usage self-write status:",
-    error ? `blocked (${error.message})` : "allowed",
-  );
+  shouldFail(error, "daily_message_usage user-controlled write");
 } });
 
 Deno.test({ name: "authenticated user cannot manipulate voice_usage count arbitrarily", sanitizeOps: false, sanitizeResources: false, fn: async () => {

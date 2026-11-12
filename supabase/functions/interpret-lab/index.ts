@@ -52,6 +52,7 @@ serve(async (req) => {
       .from("subscriptions")
       .select("plan, status")
       .eq("user_id", userId)
+      .eq("plan_type", "chat")
       .eq("status", "active")
       .maybeSingle();
 
@@ -62,14 +63,33 @@ serve(async (req) => {
       });
     }
 
-    const { filePath, fileType, preferredLanguage } = await req.json();
+    const body = await req.json().catch(() => null);
+    const filePath = body?.filePath;
+    const fileType = body?.fileType;
 
-    if (!filePath) {
-      return new Response(JSON.stringify({ error: "Missing file path" }), {
+    const pathParts = typeof filePath === "string" ? filePath.split("/") : [];
+    const allowedFileType = typeof fileType === "string" &&
+      (/^image\/(jpeg|png|webp|gif)$/.test(fileType) || fileType === "application/pdf");
+    if (!allowedFileType || pathParts.length !== 2 || pathParts[0] !== userId ||
+        !pathParts[1] || pathParts[1] === "." || pathParts[1] === ".." || filePath.length > 512) {
+      return new Response(JSON.stringify({ error: "Invalid lab file request" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    const { data: profile } = await serviceClient
+      .from("profiles")
+      .select("preferred_language")
+      .eq("id", userId)
+      .maybeSingle();
+    const languageMap: Record<string, string> = {
+      en: "English", es: "Spanish", fr: "French", de: "German", it: "Italian", pt: "Portuguese",
+      zh: "Chinese (Simplified)", ja: "Japanese", ko: "Korean", ar: "Arabic", hi: "Hindi", ru: "Russian",
+      nl: "Dutch", pl: "Polish", tr: "Turkish", vi: "Vietnamese", th: "Thai", id: "Indonesian",
+      ms: "Malay", sw: "Swahili", yo: "Yoruba", ha: "Hausa", ig: "Igbo", am: "Amharic", zu: "Zulu",
+    };
+    const preferredLanguage = languageMap[profile?.preferred_language || "en"] || "English";
 
     // Download file from storage
     const { data: fileData, error: downloadError } = await serviceClient.storage
@@ -80,6 +100,13 @@ serve(async (req) => {
       console.error("Download error:", downloadError);
       return new Response(JSON.stringify({ error: "Failed to download file" }), {
         status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (fileData.size > 12 * 1024 * 1024) {
+      return new Response(JSON.stringify({ error: "Lab files must be 12 MB or smaller" }), {
+        status: 413,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -110,7 +137,7 @@ IMPORTANT:
 - Always remind users that this is AI-assisted interpretation and should be confirmed with their healthcare provider
 - Be thorough but use simple, understandable language
 - If the image/document is unclear or not a lab result, politely let the user know
-${preferredLanguage && preferredLanguage !== "en" ? `\nRespond in the user's preferred language (code: ${preferredLanguage}).` : ""}`;
+${preferredLanguage !== "English" ? `\nRespond in ${preferredLanguage}.` : ""}`;
 
     // Build message with file content
     const userContent: any[] = [

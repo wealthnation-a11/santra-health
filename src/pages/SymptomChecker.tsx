@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/hooks/useAuth";
 import ReactMarkdown from "react-markdown";
+import { supabase } from "@/integrations/supabase/client";
 
 const bodyAreas = [
   "Head", "Eyes", "Ears", "Nose/Throat", "Chest", "Abdomen", "Back",
@@ -72,12 +73,11 @@ Remember: You are providing educational health information, not a medical diagno
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token || ""}`,
         },
         body: JSON.stringify({
           messages: [{ role: "user", content: prompt }],
           conversationHistory: [],
-          userId: user?.id,
         }),
         signal: abortRef.current.signal,
       });

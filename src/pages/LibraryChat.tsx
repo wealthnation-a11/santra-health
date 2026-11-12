@@ -15,6 +15,7 @@ import { getLibraryById } from "@/data/libraries";
 import { findLastIndex } from "@/lib/arrayUtils";
 import { trackUsage } from "@/lib/trackUsage";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/library-chat`;
 
@@ -106,9 +107,9 @@ export default function LibraryChat() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token || ""}`,
       },
-      body: JSON.stringify({ messages, conversationHistory, systemPrompt, libraryId }),
+      body: JSON.stringify({ messages, conversationHistory, libraryId }),
       signal,
     });
 

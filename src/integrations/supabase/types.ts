@@ -516,6 +516,36 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_payment_receipts: {
+        Row: {
+          amount: number
+          currency: string
+          paid_at: string
+          plan: string
+          plan_type: string
+          reference: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          currency: string
+          paid_at?: string
+          plan: string
+          plan_type: string
+          reference: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          currency?: string
+          paid_at?: string
+          plan?: string
+          plan_type?: string
+          reference?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           created_at: string
@@ -794,6 +824,18 @@ export type Database = {
       }
       admin_user_countries: { Args: never; Returns: Json }
       admin_user_detail: { Args: { _user_id: string }; Returns: Json }
+      consume_daily_message: { Args: never; Returns: boolean }
+      fulfill_verified_payment: {
+        Args: {
+          p_amount: number
+          p_currency: string
+          p_plan: string
+          p_plan_type: string
+          p_reference: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

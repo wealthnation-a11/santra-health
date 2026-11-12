@@ -19,6 +19,7 @@ export function useSubscription() {
       .from("subscriptions")
       .select("plan, status")
       .eq("user_id", user.id)
+      .eq("plan_type", "chat")
       .eq("status", "active")
       .maybeSingle();
 

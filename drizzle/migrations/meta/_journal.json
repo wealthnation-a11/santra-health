@@ -15,6 +15,13 @@
       "when": 1794448710484,
       "tag": "0001_correct_chat_settings_and_quota_table_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794449122606,
+      "tag": "0002_atomic_payment_receipt_fulfillment",
+      "breakpoints": true
     }
   ]
 }

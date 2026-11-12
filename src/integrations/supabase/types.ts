@@ -825,6 +825,17 @@ export type Database = {
       admin_user_countries: { Args: never; Returns: Json }
       admin_user_detail: { Args: { _user_id: string }; Returns: Json }
       consume_daily_message: { Args: never; Returns: boolean }
+      fulfill_verified_payment: {
+        Args: {
+          p_amount: number
+          p_currency: string
+          p_plan: string
+          p_plan_type: string
+          p_reference: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

@@ -8,6 +8,13 @@
       "when": 1794448478262,
       "tag": "0000_lock_down_chat_limits_settings_and_payment_receipts",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1794448710484,
+      "tag": "0001_correct_chat_settings_and_quota_table_grants",
+      "breakpoints": true
     }
   ]
 }

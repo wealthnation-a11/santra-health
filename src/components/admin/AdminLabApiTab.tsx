@@ -249,7 +249,7 @@ export function AdminLabApiTab() {
 }`}</pre>
           </div>
           <p className="text-xs text-muted-foreground">
-            Pass a base64 <code>file</code> + <code>mimeType</code>, or a public <code>fileUrl</code>. Errors return JSON with an <code>error</code> field and status 400/401/429/500.
+            Pass a base64 <code>file</code> + <code>mimeType</code>, or a publicly reachable HTTPS <code>fileUrl</code>. URL downloads reject private-network hosts, IP addresses, redirects, and files larger than 12 MB. Errors return JSON with an <code>error</code> field and status 400/401/429/500.
           </p>
         </CardContent>
       </Card>

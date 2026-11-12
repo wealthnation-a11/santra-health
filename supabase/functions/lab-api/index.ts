@@ -121,7 +121,19 @@ serve(async (req) => {
     if (file && typeof file === "string") {
       // Strip optional data URL prefix
       base64 = file.replace(/^data:[^;]+;base64,/, "");
-      finalMimeType = mimeType || "image/jpeg";
+      finalMimeType = typeof mimeType === "string" ? mimeType : "image/jpeg";
+      if (!/^image\/(jpeg|png|webp|gif)$/.test(finalMimeType) && finalMimeType !== "application/pdf") {
+        await logUsage(serviceClient, keyRow.id, "error", "Unsupported MIME type");
+        return new Response(JSON.stringify({ error: "Only JPEG, PNG, WebP, GIF, and PDF files are supported." }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64) || base64.length > 16_777_216) {
+        await logUsage(serviceClient, keyRow.id, "error", "Invalid or oversized file data");
+        return new Response(JSON.stringify({ error: "File data is invalid or exceeds the 12 MB limit." }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     } else if (fileUrl && typeof fileUrl === "string") {
       const dl = await fetch(fileUrl);
       if (!dl.ok) {

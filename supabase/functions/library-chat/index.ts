@@ -97,7 +97,17 @@ serve(async (req) => {
     console.log(`Library chat request for library: ${libraryId}`);
 
     // Only server-defined instructions are passed to the model.
-    const systemPrompt = `You are Santra inside the ${libraryId} educational library. Follow its educational scope, do not diagnose or prescribe, and remind users to consult a qualified healthcare professional for personal medical decisions. Keep the response focused, clear, and educational. At the end, include 2-3 concise contextual follow-up questions in this exact format: [SUGGESTIONS]: Question 1? | Question 2?`;
+    const libraryGuidance: Record<string, string> = {
+      "medical-dictionary": "Define medical terms, abbreviations, and acronyms simply. Do not diagnose or recommend treatment.",
+      "anatomy-physiology": "Explain body systems, organ functions, and physiological processes for learning, not clinical management.",
+      "diseases-conditions": "Explain conditions, causes, risk factors, common symptoms, and prevention. Do not diagnose or recommend treatment or drugs.",
+      pharmacology: "Explain drug classes, mechanisms, educational indications, side effects, and contraindications. Never recommend a specific drug, dosage, or prescription.",
+      "laboratory-tests": "Explain what tests measure, typical reference ranges, and general reasons results may be high or low. Do not diagnose.",
+      "study-prep": "Provide concise summaries, mnemonics, concept explanations, and educational exam guidance.",
+      "clinical-cases": "Use only hypothetical scenarios. Present a case, ask learning questions, and guide educational reasoning. State clearly that cases are fictional.",
+      "research-evidence": "Explain study designs, evidence hierarchy, bias, limitations, and how to read research. Do not claim certainty beyond evidence.",
+    };
+    const systemPrompt = `You are Santra inside the ${libraryId} educational library. ${libraryGuidance[libraryId]} This is education only, not personalized medical advice; direct personal medical questions to a qualified clinician. At the end, include 2-3 concise contextual follow-up questions in this exact format: [SUGGESTIONS]: Question 1? | Question 2?`;
     const formattedMessages = [
       { role: "system", content: systemPrompt },
       ...body.conversationHistory.map((msg: { role: "user" | "assistant"; content: string }) => ({

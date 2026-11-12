@@ -211,8 +211,10 @@ export default function Admin() {
     const headers = Array.from(new Set(rows.flatMap((r) => Object.keys(r))));
     const escape = (v: any) => {
       if (v === null || v === undefined) return "";
-      const s = typeof v === "object" ? JSON.stringify(v) : String(v);
-      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+      let s = typeof v === "object" ? JSON.stringify(v) : String(v);
+      // Prevent spreadsheet formula execution from untrusted exported values.
+      if (/^[\t\r\n ]*[=+\-@]/.test(s)) s = `'${s}`;
+      return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
     return [headers.join(","), ...rows.map((r) => headers.map((h) => escape(r[h])).join(","))].join("\n");
   };

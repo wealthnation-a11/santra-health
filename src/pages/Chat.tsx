@@ -38,7 +38,7 @@ export default function Chat() {
   const abortControllerRef = useRef<AbortController | null>(null);
   
   const { profile, signOut, user } = useAuth();
-  const { remainingMessages, canSendMessage, dailyLimit, incrementUsage } = useMessageUsage();
+  const { remainingMessages, canSendMessage, dailyLimit, refreshUsage } = useMessageUsage();
   const {
     conversations,
     activeConversation,
@@ -168,15 +168,19 @@ export default function Chat() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token || ""}`,
       },
-      body: JSON.stringify({ messages, conversationHistory, userId: user?.id, preferredLanguage: profile?.preferred_language || "en" }),
+      body: JSON.stringify({ messages, conversationHistory }),
       signal,
     });
 
+    await refreshUsage();
+
     if (!resp.ok) {
       const errorData = await resp.json().catch(() => ({}));
-      if (resp.status === 429) {
+      if (errorData.code === "DAILY_LIMIT") {
+        setShowLimitModal(true);
+      } else if (resp.status === 429) {
         toast.error("Rate limit exceeded. Please wait a moment and try again.");
       } else if (resp.status === 402) {
         toast.error("Service temporarily unavailable. Please try again later.");
@@ -246,7 +250,7 @@ export default function Chat() {
     }
 
     onDone();
-  }, []);
+  }, [refreshUsage]);
 
   const handleSendMessage = async (content: string) => {
     // Check daily limit
@@ -265,8 +269,6 @@ export default function Chat() {
 
     // Add user message and increment usage
     await addMessage(conversationId, content, "user");
-    await incrementUsage();
-
     // Check for emergency keywords
     const isEmergency = emergencyKeywords.some((keyword) =>
       content.toLowerCase().includes(keyword)
@@ -410,8 +412,6 @@ export default function Chat() {
     // Add user message indicating file upload
     const fileLabel = file.type.startsWith("image/") ? "🖼️ Lab Image" : "📄 Lab Document";
     await addMessage(conversationId, `${fileLabel}: ${file.name}\n\nPlease analyze this lab result.`, "user");
-    await incrementUsage();
-
     setIsTyping(true);
     setStreamingContent("");
     abortControllerRef.current = new AbortController();

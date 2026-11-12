@@ -42,17 +42,29 @@ Deno.serve(async (req) => {
     }
 
     const userId = claimsData.claims.sub;
-    const { reference, planType } = await req.json();
+    const authUserResult = await supabase.auth.getUser(token);
+    const userEmail = authUserResult.data.user?.email?.trim().toLowerCase();
+    const body = await req.json().catch(() => null);
+    const reference = body?.reference;
+    const refMatch = typeof reference === "string"
+      ? /^santra_(premium|edu_starter|edu_pro)_(monthly|annual)_([0-9a-f-]{36})_(\d{10,})$/i.exec(reference)
+      : null;
 
-    if (!reference) {
+    if (!userEmail || authUserResult.error || !refMatch || refMatch[3].toLowerCase() !== userId.toLowerCase()) {
       return new Response(JSON.stringify({ error: "Missing payment reference" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
+    const planKey = refMatch[1].toLowerCase();
+    const interval = refMatch[2].toLowerCase();
+    const isEducation = planKey !== "premium";
+    const dbPlanType = isEducation ? "edu" : "chat";
+    const plan = isEducation ? planKey : "premium";
+
     // Verify payment with Paystack
-    const verifyRes = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
+    const verifyRes = await fetch(`https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`, {
       headers: {
         Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
       },
@@ -60,75 +72,62 @@ Deno.serve(async (req) => {
 
     const verifyData = await verifyRes.json();
 
-    if (!verifyRes.ok || !verifyData.status || verifyData.data?.status !== "success") {
+    if (!verifyRes.ok || !verifyData.status || verifyData.data?.status !== "success" ||
+        verifyData.data?.reference !== reference ||
+        verifyData.data?.customer?.email?.trim()?.toLowerCase() !== userEmail) {
       return new Response(
-        JSON.stringify({ error: "Payment verification failed", details: verifyData }),
+        JSON.stringify({ error: "Payment verification failed" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Determine plan and plan_type from reference
-    const ref = reference as string;
-    let plan = "premium";
-    let dbPlanType = "chat";
-
-    if (planType === "edu") {
-      dbPlanType = "edu";
-      if (ref.includes("edu_pro")) {
-        plan = "edu_pro";
-      } else if (ref.includes("edu_starter")) {
-        plan = "edu_starter";
-      }
-    }
-
-    // Payment verified — upsert subscription
     const serviceClient = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
+    const { data: profile } = await serviceClient.from("profiles").select("country").eq("id", userId).maybeSingle();
+    const country = profile?.country || "";
+    const africa = new Set(["Nigeria", "Ghana", "South Africa", "Kenya", "Egypt", "Tanzania", "Uganda", "Ethiopia", "Rwanda", "Cameroon", "Senegal", "Ivory Coast", "Angola", "Mozambique", "Zambia", "Zimbabwe", "Botswana"]);
+    const chatPricing: Record<string, { currency: string; monthly: number; annual: number }> = {
+      Nigeria: { currency: "NGN", monthly: 450000, annual: 3750000 },
+      Ghana: { currency: "GHS", monthly: 5000, annual: 41700 },
+      "South Africa": { currency: "ZAR", monthly: 9000, annual: 75000 },
+      Kenya: { currency: "KES", monthly: 65000, annual: 541700 },
+    };
+    const educationPricing: Record<string, { currency: string; starterMonthly: number; starterAnnual: number; proMonthly: number; proAnnual: number }> = {
+      Nigeria: { currency: "NGN", starterMonthly: 200000, starterAnnual: 1670000, proMonthly: 800000, proAnnual: 6670000 },
+      Ghana: { currency: "GHS", starterMonthly: 2000, starterAnnual: 16700, proMonthly: 8000, proAnnual: 66700 },
+      "South Africa": { currency: "ZAR", starterMonthly: 3600, starterAnnual: 30000, proMonthly: 14400, proAnnual: 120000 },
+      Kenya: { currency: "KES", starterMonthly: 26000, starterAnnual: 216700, proMonthly: 104000, proAnnual: 866700 },
+    };
+    const fallbackCurrency = africa.has(country) ? "USD" : "USD";
+    const chatPrice = chatPricing[country] || { currency: fallbackCurrency, monthly: africa.has(country) ? 300 : 500, annual: africa.has(country) ? 2500 : 4167 };
+    const eduPrice = educationPricing[country] || { currency: "USD", starterMonthly: 200, starterAnnual: 1700, proMonthly: 800, proAnnual: 6700 };
+    const expectedCurrency = isEducation ? eduPrice.currency : chatPrice.currency;
+    const expectedAmount = isEducation
+      ? planKey === "edu_starter"
+        ? (interval === "annual" ? eduPrice.starterAnnual : eduPrice.starterMonthly)
+        : (interval === "annual" ? eduPrice.proAnnual : eduPrice.proMonthly)
+      : (interval === "annual" ? chatPrice.annual : chatPrice.monthly);
+    if (verifyData.data.amount !== expectedAmount || verifyData.data.currency !== expectedCurrency) {
+      return new Response(JSON.stringify({ error: "Payment amount or currency does not match this plan" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
-    // Check if edu subscription exists
-    const { data: existingSub } = await serviceClient
-      .from("subscriptions")
-      .select("id")
-      .eq("user_id", userId)
-      .eq("plan_type", dbPlanType)
-      .maybeSingle();
-
-    if (existingSub) {
-      const { error: updateError } = await serviceClient
-        .from("subscriptions")
-        .update({
-          plan,
-          status: "active",
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", existingSub.id);
-
-      if (updateError) {
-        console.error("Subscription update error:", updateError);
-        return new Response(
-          JSON.stringify({ error: "Failed to update subscription" }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-    } else {
-      const { error: insertError } = await serviceClient
-        .from("subscriptions")
-        .insert({
-          user_id: userId,
-          plan,
-          plan_type: dbPlanType,
-          status: "active",
-        });
-
-      if (insertError) {
-        console.error("Subscription insert error:", insertError);
-        return new Response(
-          JSON.stringify({ error: "Failed to create subscription" }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
+    const { data: fulfilled, error: fulfillmentError } = await serviceClient.rpc("fulfill_verified_payment", {
+      p_reference: reference,
+      p_user_id: userId,
+      p_plan_type: dbPlanType,
+      p_plan: plan,
+      p_amount: expectedAmount,
+      p_currency: expectedCurrency,
+    });
+    if (fulfillmentError || fulfilled !== true) {
+      console.error("Payment fulfillment failed:", fulfillmentError?.message || "reference already used");
+      return new Response(JSON.stringify({ error: "Payment reference has already been used or could not be applied" }), {
+        status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     return new Response(

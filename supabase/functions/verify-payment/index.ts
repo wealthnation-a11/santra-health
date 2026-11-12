@@ -100,7 +100,7 @@ Deno.serve(async (req) => {
       "South Africa": { currency: "ZAR", starterMonthly: 3600, starterAnnual: 30000, proMonthly: 14400, proAnnual: 120000 },
       Kenya: { currency: "KES", starterMonthly: 26000, starterAnnual: 216700, proMonthly: 104000, proAnnual: 866700 },
     };
-    const fallbackCurrency = africa.has(country) ? "USD" : "USD";
+    const fallbackCurrency = "USD";
     const chatPrice = chatPricing[country] || { currency: fallbackCurrency, monthly: africa.has(country) ? 300 : 500, annual: africa.has(country) ? 2500 : 4167 };
     const eduPrice = educationPricing[country] || { currency: "USD", starterMonthly: 200, starterAnnual: 1700, proMonthly: 800, proAnnual: 6700 };
     const expectedCurrency = isEducation ? eduPrice.currency : chatPrice.currency;

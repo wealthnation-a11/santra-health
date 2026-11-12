@@ -117,7 +117,7 @@ serve(async (req) => {
       .maybeSingle();
     const isPremium = subscription?.plan === "premium";
     if (!isPremium) {
-      const { data: allowed, error: quotaError } = await sb.rpc("consume_daily_message");
+      const { data: allowed, error: quotaError } = await authClient.rpc("consume_daily_message");
       if (quotaError) {
         console.error("Daily quota check failed:", quotaError.message);
         return new Response(JSON.stringify({ error: "Unable to verify message allowance" }), {

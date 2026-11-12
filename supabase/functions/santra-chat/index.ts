@@ -45,16 +45,91 @@ serve(async (req) => {
   }
 
   try {
-    const { messages, conversationHistory, userId, preferredLanguage } = await req.json();
+    if (req.method !== "POST") {
+      return new Response(JSON.stringify({ error: "Method not allowed" }), {
+        status: 405, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const authClient = createClient(supabaseUrl, anonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const token = authHeader.slice("Bearer ".length);
+    const { data: claimsData, error: claimsError } = await authClient.auth.getClaims(token);
+    const userId = claimsData?.claims?.sub;
+    if (claimsError || typeof userId !== "string") {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const body = await req.json().catch(() => null);
+    if (!body || !Array.isArray(body.messages) || !Array.isArray(body.conversationHistory) ||
+        body.messages.length < 1 || body.messages.length > 10 || body.conversationHistory.length > 80) {
+      return new Response(JSON.stringify({ error: "Invalid chat request" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const isValidMessage = (message: unknown, current: boolean) => {
+      if (!message || typeof message !== "object") return false;
+      const item = message as { role?: unknown; content?: unknown };
+      return (item.role === "user" || (!current && item.role === "assistant")) &&
+        typeof item.content === "string" && item.content.trim().length > 0 && item.content.length <= 20000;
+    };
+    if (!body.messages.every((m: unknown) => isValidMessage(m, true)) ||
+        !body.conversationHistory.every((m: unknown) => isValidMessage(m, false))) {
+      return new Response(JSON.stringify({ error: "Invalid chat message" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const sb = createClient(supabaseUrl, supabaseKey);
+
+    const { data: profile } = await sb
+      .from("profiles")
+      .select("preferred_language")
+      .eq("id", userId)
+      .maybeSingle();
+    const preferredLanguage = profile?.preferred_language || "en";
+
+    const { data: subscription } = await sb
+      .from("subscriptions")
+      .select("plan")
+      .eq("user_id", userId)
+      .eq("plan_type", "chat")
+      .eq("status", "active")
+      .maybeSingle();
+    const isPremium = subscription?.plan === "premium";
+    if (!isPremium) {
+      const { data: allowed, error: quotaError } = await sb.rpc("consume_daily_message");
+      if (quotaError) {
+        console.error("Daily quota check failed:", quotaError.message);
+        return new Response(JSON.stringify({ error: "Unable to verify message allowance" }), {
+          status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (allowed !== true) {
+        return new Response(JSON.stringify({ error: "Daily message limit reached", code: "DAILY_LIMIT" }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    }
 
     // Build personalized system prompt with health profile context
     let systemPrompt = BASE_SYSTEM_PROMPT;
@@ -108,18 +183,20 @@ serve(async (req) => {
         vi: "Vietnamese", th: "Thai", id: "Indonesian", ms: "Malay", sw: "Swahili",
         yo: "Yoruba", ha: "Hausa", ig: "Igbo", am: "Amharic", zu: "Zulu",
       };
-      const langName = langMap[preferredLanguage] || preferredLanguage;
+      const langName = langMap[preferredLanguage];
+      if (langName) {
       systemPrompt += `\n\nIMPORTANT: Always respond in ${langName}. The user prefers ${langName} as their language.`;
+      }
     }
 
     // Build conversation context
     const formattedMessages = [
       { role: "system", content: systemPrompt },
-      ...(conversationHistory || []).map((msg: { role: string; content: string }) => ({
+      ...body.conversationHistory.map((msg: { role: "user" | "assistant"; content: string }) => ({
         role: msg.role,
         content: msg.content,
       })),
-      ...messages,
+      ...body.messages,
     ];
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -195,7 +272,7 @@ serve(async (req) => {
         await writer.close();
         
         // Extract and save memories after stream completes
-        if (userId && fullContent) {
+        if (fullContent) {
           try {
             const memoryMatch = fullContent.match(/\[MEMORY\]:\s*(.+)/);
             if (memoryMatch) {
@@ -243,7 +320,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("Chat error:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      JSON.stringify({ error: "Unable to process chat request" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

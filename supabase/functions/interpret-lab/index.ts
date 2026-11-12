@@ -52,6 +52,7 @@ serve(async (req) => {
       .from("subscriptions")
       .select("plan, status")
       .eq("user_id", userId)
+      .eq("plan_type", "chat")
       .eq("status", "active")
       .maybeSingle();
 

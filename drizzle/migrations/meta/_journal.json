@@ -22,6 +22,13 @@
       "when": 1794449122606,
       "tag": "0002_atomic_payment_receipt_fulfillment",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794449245894,
+      "tag": "0003_support_dual_plan_payment_fulfillment",
+      "breakpoints": true
     }
   ]
 }
